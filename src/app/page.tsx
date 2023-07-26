@@ -42,6 +42,7 @@ export default function Home() {
 
       <div className={styles.grid}>
         <Link href={"detail"}>Detail</Link>
+        <Link href={"reports"}>Reports</Link>
         <a
           href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
           className={styles.card}
