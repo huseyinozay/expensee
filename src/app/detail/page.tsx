@@ -1,14 +1,15 @@
+"use client";
+
 import Image from "next/image";
 import styles from "../page.module.css";
+
+import i18n from "@/plugins/i18n";
 
 export default function Detail() {
   return (
     <main className={styles.main}>
       <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
+        <p>{i18n.t("expenses")}</p>
         <div>
           <a
             href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
