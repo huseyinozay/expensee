@@ -137,7 +137,6 @@ export default function DrawerExpense({
       // @ts-ignore
       expense[data.name] = data.value;
     }
-    // console.log(expense);
   };
   return (
     <>
