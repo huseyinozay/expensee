@@ -1,9 +1,9 @@
-:root {
+/* :root {
   --max-width: 1100px;
   --border-radius: 12px;
-  --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
-    'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',
-    'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
+  --font-mono: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono",
+    "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
+    "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
 
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -104,4 +104,61 @@ a {
   html {
     color-scheme: dark;
   }
+} */
+
+.all-page {
+  height: 100vh;
+  width: 100%;
+}
+.login-background {
+  background: rgb(2, 0, 36);
+  background: linear-gradient(0deg, #b4a6ff 0%, #c9c2f8 30%, #eae8fc 100%);
+  // background: linear-gradient(0deg, #ffda62 0%, #ffebab 35%, #fff3d1 100%);
+  // background: linear-gradient(0deg, #504978 0%, #9b91dd 35%, #dbd7fa 100%);
+}
+.image-container {
+  width: 100%;
+
+  > div {
+    position: unset !important;
+  }
+
+  .image {
+    object-fit: contain;
+    width: 100% !important;
+    position: relative !important;
+    height: 15vh !important;
+  }
+}
+
+.scroll-container {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding: 0.5rem;
+  padding-bottom: 2rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.sidebar-column {
+  float: left;
+  flex: 1;
+  background-color: #6a60a9;
+  height: 100vh;
+}
+
+.main-column {
+  float: right;
+  flex: 11;
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+.row:after {
+  display: table;
+  clear: both;
 }

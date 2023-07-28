@@ -5,7 +5,7 @@ class ApiService {
   private token: string | null = null;
 
   constructor() {
-    this.baseUrl = "https://api.masraff.co/";
+    this.baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   }
 
   public setToken(token: string): void {
