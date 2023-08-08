@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  transpilePackages: ["@fabrikant-masraff/masraff-react"],
-};
+    transpilePackages: ["@fabrikant-masraff/masraff-react","@fabrikant-masraff/masraff-core"],
+    excludeFile: (str) => str === 'layout.css',
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

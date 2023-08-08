@@ -1,0 +1,21 @@
+.header-main {
+  z-index: 4;
+  height: 50px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+.mainColumn {
+  float: right;
+  flex: 11;
+  overflow-y: scroll;
+  height: 100vh;
+}
+
+.sidebarColumn {
+  float: left;
+  flex: 1;
+  background-color: #6a60a9;
+  height: 100vh;
+}

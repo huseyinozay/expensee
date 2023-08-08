@@ -1,5 +1,5 @@
 {
-  "name": "masraff-admin",
+  "name": "masraff-admin-v2",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,30 +12,22 @@
     "@fabrikant-masraff/masraff-core": "^0.0.4",
     "@fabrikant-masraff/masraff-react": "^0.0.4",
     "@reduxjs/toolkit": "^1.9.5",
-    "@tanstack/react-query": "^4.29.7",
-    "@tanstack/react-query-devtools": "^4.29.7",
-    "@types/node": "18.15.13",
-    "@types/react": "18.0.38",
-    "@types/react-dom": "18.0.11",
-    "eslint": "8.39.0",
-    "eslint-config-next": "13.3.1",
-    "i18next": "^23.0.2",
-    "jose": "^4.14.4",
+    "@tanstack/react-query": "^4.32.0",
+    "@tanstack/react-query-devtools": "^4.32.0",
+    "@types/node": "20.4.2",
+    "@types/react": "18.2.15",
+    "@types/react-dom": "18.2.7",
+    "eslint": "8.45.0",
+    "eslint-config-next": "13.4.10",
     "js-cookie": "^3.0.5",
-    "jsonwebtoken": "^9.0.0",
-    "next": "13.3.1",
-    "next-redux-wrapper": "^8.1.0",
-    "qrcode": "^1.5.3",
+    "next": "13.4.10",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-i18next": "^13.0.0",
-    "react-redux": "^8.0.5",
-    "redux-persist": "^6.0.0",
-    "sass": "^1.62.1",
-    "typescript": "5.0.4"
+    "react-i18next": "^13.0.2",
+    "react-redux": "^8.1.1",
+    "typescript": "5.1.6"
   },
   "devDependencies": {
-    "@types/js-cookie": "^3.0.3",
-    "@types/qs": "^6.9.7"
+    "@types/js-cookie": "^3.0.3"
   }
 }
