@@ -19,13 +19,17 @@ interface HeaderProps {
 }
 
 const Header: NextPage<HeaderProps> = ({ children }) => {
+  const [userString, setUserString] = useState<any>("");
   const { t } = useTranslation();
   const router = useRouter();
-  const userString = localStorage.getItem("user");
   const { firstName, lastName } = userString && JSON.parse(userString);
   const dispatch = useAppDispatch();
   const rowBlockClassname =
     "ma-display-flex ma-display-flex-row ma-display-flex-align-items-center";
+
+  useEffect(() => {
+    setUserString(localStorage.getItem("user"));
+  }, []);
 
   return (
     <div className="full-screen">
