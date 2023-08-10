@@ -285,14 +285,14 @@ export const defaultExpenseFilter = {
 };
 
 export const emptyExpense = {
-  id: 0,
+  id: null,
   name: "",
-  approverUserId: 0,
-  userId: 0,
+  approverUserId: null,
+  userId: null,
   amount: null,
   note: "",
   billable: false,
-  tag_LookupId: 0,
+  tag_LookupId: null,
   status: 0,
   taxPercentage: 0,
   taxAmount: 0,
@@ -305,11 +305,11 @@ export const emptyExpense = {
   paymentMethod: 0,
   tag_Lookup: {},
   conversionAmount: null,
-  sourceType: 0,
+  sourceType: 2, // 2: Manual
   expenseDate: "",
   receiptNumber: "",
   merchant: "",
-  reportId: 0,
+  reportId: null,
   ohpCodeId: 0,
   attendeesList: [],
   attendeesNumber: 0,

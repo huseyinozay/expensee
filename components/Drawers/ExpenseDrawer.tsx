@@ -113,8 +113,10 @@ export default function ExpenseDrawer({
   const mutateExchangeRate = useMutation(changeExchangeRate, {
     onSuccess: (data: number) => {
       const tempExpense = { ...selectedExpense };
-      tempExpense.currencyRate = data;
-      tempExpense.conversionAmount = data * selectedExpense.amount;
+      const tempCurrencyRate = data;
+      tempExpense.currencyRate = tempCurrencyRate.toString();
+      const tempconversionAmount = data * selectedExpense.amount;
+      tempExpense.conversionAmount = tempconversionAmount.toString();
       setSelectedExpense(tempExpense);
     },
   });
@@ -129,6 +131,7 @@ export default function ExpenseDrawer({
     const tempExpense = { ...selectedExpense };
     //@ts-ignore
     tempExpense.user = user;
+    tempExpense.userId = user.userId;
     saveExpense(tempExpense)
       .then(() => changeStatus(false))
       .catch(() => console.log("Saving expense error"));
@@ -145,7 +148,8 @@ export default function ExpenseDrawer({
       tempExpense.expenseTypeId = changedCategory.id;
     }
     if (data.name === "taxPercentage") {
-      tempExpense.taxAmount = (tempExpense.amount * data.value) / 100;
+      const tempTax = (tempExpense.amount * data.value) / 100;
+      tempExpense.taxAmount = tempTax.toString();
     }
 
     //@ts-ignore

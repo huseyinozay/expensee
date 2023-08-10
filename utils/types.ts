@@ -26,7 +26,7 @@ type DropdownSelection = {
 interface SubCompany {
   id: number;
   name: string;
-  code:string;
+  code: string;
   parentCompany: number;
   company: any;
   createDate: string;
@@ -35,12 +35,12 @@ interface SubCompany {
 
 interface TripReport {
   userTripReportList: any[];
-  isEnableForExpenseReport: boolean
+  isEnableForExpenseReport: boolean;
 }
 
-interface AdvanceReport{
+interface AdvanceReport {
   id: number;
-  name:string;
+  name: string;
 }
 
 interface OhpCodeData {
@@ -57,15 +57,14 @@ type Expense = {
   id: number;
   name: string;
   approverUserId: number;
-  userId: number;
   amount: number;
   note: string;
   billable: boolean;
   tag_LookupId: number;
   status: number;
   taxPercentage: number;
-  taxAmount: number;
-  currencyRate: number;
+  taxAmount: string;
+  currencyRate: string;
   reimbursable: boolean;
   currency: number;
   expenseTypeId: number;
@@ -73,7 +72,7 @@ type Expense = {
   isLimitExceeded: boolean;
   paymentMethod: number;
   tag_Lookup: Object;
-  conversionAmount: number;
+  conversionAmount: string;
   sourceType: number;
   expenseDate: string;
   receiptNumber: string;
@@ -83,8 +82,8 @@ type Expense = {
   attendeesList: Array<string>;
   attendeesNumber: number;
   expenseType: { name: string };
+  userId: number;
 };
-
 
 interface ExpenseReport {
   advanceReport: any;
@@ -135,7 +134,6 @@ interface ExpenseReport {
   vehicle: any;
   workflows: any[];
 }
-
 
 type ExchangeRate = {
   SourceCurrency: number;
