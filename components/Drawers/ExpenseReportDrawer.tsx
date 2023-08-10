@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import Dropdown from "@/components/Dropdown";
 import { allReadyExpenseColumns } from "@/utils/data";
 import DataTable from "@/components/DataTable";
-import { emptyExpenseReport, globalUserObject } from "@/utils/utils";
+import { emptyExpenseReport } from "@/utils/utils";
 import { filterObjectsByIdAndName } from "@/utils/helpers";
 import {
   getAlreadyExpenses,
@@ -46,11 +46,7 @@ export default function ExpenseReportDrawer({
 }: ExpenseReportDrawerProps) {
   const { t } = useTranslation();
   const { userId } = data;
-  const { delegatedUserId } = globalUserObject;
-  const delegateUser =
-    delegatedUserId && delegatedUserId !== "None"
-      ? parseInt(delegatedUserId)
-      : null;
+  const [user, setUser] = useState<any>();
   const isAddExpenseReportView = Object.keys(data).length === 0;
   const [selectedExpenseReport, setSelectedExpenseReport] =
     useState<ExpenseReport>(
@@ -95,9 +91,9 @@ export default function ExpenseReportDrawer({
 
   const addExpenseReport = () => {
     const tempExpenseReport = { ...selectedExpenseReport };
-    tempExpenseReport.user = globalUserObject;
+    tempExpenseReport.user = user;
     //@ts-ignore
-    tempExpenseReport.user = globalUserObject;
+    tempExpenseReport.user = user;
     saveExpenseReport(tempExpenseReport)
       .then(() => changeStatus(false))
       .catch(() => console.log("Saving expense report error"));
@@ -144,7 +140,14 @@ export default function ExpenseReportDrawer({
       fetchTripReport().then((resp) => setUserTripReport(resp));
     }
   }, []);
-  
+
+  useEffect(() => {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      setUser(JSON.parse(userString));
+    }
+  }, []);
+
   return (
     <>
       <MaDrawer isOpen={isOpen} onMaClose={() => changeStatus(false)}>
