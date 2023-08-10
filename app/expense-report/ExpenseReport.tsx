@@ -1,7 +1,6 @@
 "use client";
 
-
-import { useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import DataTable from "@/components/DataTable";
@@ -41,11 +40,9 @@ import {
 import {
   deliveryStatusList,
   expenseSearchTypes,
-  globalUserObject,
   paymentMethodList,
   statusList,
 } from "@/utils/utils";
-
 
 type InputData = {
   name: string;
@@ -54,7 +51,7 @@ type InputData = {
 
 export default function ExpenseReport() {
   const { t } = useTranslation();
-  const { userId } = globalUserObject;
+  const [userId, setUserId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenReportDetail, setOpenReportDetail] = useState(false);
   const [reset, setReset] = useState(false);
@@ -80,8 +77,6 @@ export default function ExpenseReport() {
   const [filterData, setFilterData] = useState<{
     [key: string]: number | string;
   }>({});
-
-  
 
   const today = new Date();
   const min = new Date(
@@ -187,6 +182,11 @@ export default function ExpenseReport() {
     }
   };
 
+  useEffect(() => {
+    // @ts-ignore
+    setUserId(JSON.parse(window.localStorage.getItem("user")).userId);
+  }, []);
+
   return (
     <>
       <h4 style={{ borderBottom: "2px solid #fbd14b ", height: "50px" }}>
@@ -218,7 +218,7 @@ export default function ExpenseReport() {
                   <div>
                     <MaButton
                       onMaClick={() => {
-                        setRow({})
+                        setRow({});
                         changeStatus(true);
                       }}
                       className="ma-size-padding-right-16"

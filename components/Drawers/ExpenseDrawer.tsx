@@ -38,7 +38,6 @@ import {
   availablePaymentMethods,
   currencyList,
   emptyExpense,
-  globalUserObject,
   taxPertangeList,
 } from "@/utils/utils";
 
@@ -54,20 +53,10 @@ export default function ExpenseDrawer({
   data,
 }: DrawerExpenseProps) {
   const { t } = useTranslation();
-  const {
-    userId,
-    currency: userTargetCurrency,
-    delegatedUserId,
-  } = globalUserObject;
-  const targetCurrency =
-    userTargetCurrency &&
-    currencyList.find(
-      (currencyType) => currencyType.name === userTargetCurrency
-    );
-  const delegateUser =
-    delegatedUserId && delegatedUserId !== "None"
-      ? parseInt(delegatedUserId)
-      : null;
+  const [user, setUser] = useState<any>();
+  const [userId, setUserId] = useState("0");
+  const [targetCurrency, setTargetCurrency] = useState<any>("");
+  const [delegatedUser, setDelegatedUser] = useState<number | null>(null);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const isAddExpenseView = Object.keys(data).length === 0;
   const [selectedExpense, setSelectedExpense] = useState<Expense>(
@@ -139,14 +128,14 @@ export default function ExpenseDrawer({
   const addExpense = () => {
     const tempExpense = { ...selectedExpense };
     //@ts-ignore
-    tempExpense.user = globalUserObject;
+    tempExpense.user = user;
     saveExpense(tempExpense)
       .then(() => changeStatus(false))
       .catch(() => console.log("Saving expense error"));
   };
 
   const handleChange = (data: DropdownSelection) => {
-    console.log('kafa karisikligi::',data)
+    console.log("kafa karisikligi::", data);
     const tempExpense = { ...selectedExpense };
     if (data.name === "expenseTypeId") {
       const changedCategory = expenseCategoryData?.find(
@@ -202,6 +191,29 @@ export default function ExpenseDrawer({
     exchangeRateData.TargetCurrency,
     exchangeRateData.RateDate,
   ]);
+
+  useEffect(() => {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      setUser(JSON.parse(userString));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      setUserId(user.userId);
+      const tempDel =
+        user.delegatedUserId && user.delegatedUserId !== "None"
+          ? parseInt(user.delegatedUserId)
+          : null;
+      setDelegatedUser(tempDel);
+      const targetCur = currencyList.find(
+        (currencyType) => currencyType.name === user.currency
+      );
+      //@ts-ignore
+      setTargetCurrency(targetCur);
+    }
+  }, [user]);
 
   return (
     <>
@@ -431,7 +443,7 @@ export default function ExpenseDrawer({
                   fillStyle={MasraffFillStyle.Ghost}
                   colorType={MasraffColorType.Destructive}
                   onMaClick={() => {
-                    deleteExpense(selectedExpense.id, delegateUser);
+                    deleteExpense(selectedExpense.id, delegatedUser);
                     setDeleteModalOpen(false);
                   }}
                 >
