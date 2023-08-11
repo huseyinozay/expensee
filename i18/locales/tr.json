@@ -81,10 +81,17 @@
     "editExpenseReport": "Formu Düzenle",
     "tripReport": "Seyahat Formu",
     "advanceReport": "Avans Formu",
-    "totalAmount":"Toplam Tutar"
+    "totalAmount": "Toplam Tutar",
+    "approverEmail": "Onaylayan E-posta",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "declineReason": "Reddetme Nedeni",
+    "sendToApproval": "Onay Gönder"
   },
   "messages": { "hello": "Merhaba Dünya" },
   "validation": {
+    "approve": "{{reportName}} formunu onaylamak istediğinize emin misiniz?",
+    "decline": "{{reportName}} formunu reddetmek istediğinize emin misiniz?",
     "confirmed": "Bu alan eşleşmiyor",
     "date_after": "{date} tarihinden kucuk olamaz",
     "email": "Gecerli bir eposta adresi giriniz",

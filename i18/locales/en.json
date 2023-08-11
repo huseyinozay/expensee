@@ -26,6 +26,7 @@
     "approvingExpenseBy": "Approving Expense By",
     "expenseOwner": "Expense Owner",
     "reportNo": "Report No",
+    "reportName": "Report Name",
     "organization": "Organization",
     "logOut": "Log Out",
     "login": "Login",
@@ -36,10 +37,17 @@
     "editExpenseReport": "Edit Expense Report",
     "tripReport": "Trip Report",
     "advanceReport": "Advance Report",
-    "totalAmount":"Total Amount"
+    "totalAmount": "Total Amount",
+    "approverEmail": "Approver Email",
+    "approve": "Approve",
+    "reject": "Reject",
+    "declineReason": "Decline Reason",
+    "sendToApproval": "Send To Approval"
   },
   "messages": { "hello": "Hello World" },
   "validation": {
+    "approve": "Are you sure you want to confirm the {{reportName}} form?",
+    "decline": "Are you sure you want to decline the {{reportName}} form?",
     "confirmed": "Bu alan eşleşmiyor",
     "date_after": "{date} tarihinden kucuk olamaz",
     "email": "Gecerli bir eposta adresi giriniz",

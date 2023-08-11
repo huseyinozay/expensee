@@ -39,7 +39,7 @@ import {
 } from "@/utils/data";
 import {
   deliveryStatusList,
-  expenseSearchTypes,
+  expenseReportSearchTypes,
   paymentMethodList,
   statusList,
 } from "@/utils/utils";
@@ -185,6 +185,15 @@ export default function ExpenseReport() {
     }
   };
 
+  const onClickWaitingExpenseReportDetail: any = (id: any) => {
+    if (waitingApprovalReportsData) {
+      const currentRow = waitingApprovalReportsData.filter(
+        (item: any) => item.id === id
+      );
+      setRow(currentRow[0]);
+    }
+  };
+
   return (
     <>
       <h4 style={{ borderBottom: "2px solid #fbd14b ", height: "50px" }}>
@@ -277,8 +286,8 @@ export default function ExpenseReport() {
                               <Dropdown
                                 input={input}
                                 placeholder="Türü"
-                                selectData={expenseSearchTypes}
-                                valueName="type"
+                                selectData={expenseReportSearchTypes}
+                                valueName="searchTypeId"
                                 reset={reset}
                               />
                               <MaSpacer
@@ -462,7 +471,9 @@ export default function ExpenseReport() {
                   column={waitingApprovalReportColumns}
                   data={waitingApprovalReportsData}
                   changeStatus={changeStatus}
-                  setRowId={onClickExpenseReportDetail}
+                  changeStatus2={changeDetailStatus}
+                  hasSecondaryInteraction
+                  setRowId={onClickWaitingExpenseReportDetail}
                 />
               ) : (
                 <NoData />

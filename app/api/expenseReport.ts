@@ -84,8 +84,15 @@ export async function updateExpenseReport(expenseReport: ExpenseReport) {
   );
 }
 
+export async function updateExpenseReportStatus(expenseReport: ExpenseReport) {
+  return api.update(
+    `v1/reports/changeStatus/${expenseReport.id}`,
+    expenseReport
+  );
+}
+
 export async function saveExpenseReport(expenseReport: ExpenseReport) {
-  return api.post('v1/reports',expenseReport)
+  return api.post("v1/reports", expenseReport);
 }
 
 export async function getIndividualExpenseReport(

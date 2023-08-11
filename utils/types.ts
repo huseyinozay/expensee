@@ -133,6 +133,8 @@ interface ExpenseReport {
   userId: number;
   vehicle: any;
   workflows: any[];
+  note: string;
+  delegatedUserId: string;
 }
 
 type ExchangeRate = {

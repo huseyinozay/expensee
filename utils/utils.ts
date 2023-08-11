@@ -37,7 +37,7 @@ export const paymentMethods = {
 
 export const expenseSearchTypes = [
   {
-    id: 0,
+    id: 1,
     name: i18n.t("labels.select"),
   },
   {
@@ -59,6 +59,37 @@ export const expenseSearchTypes = [
   {
     id: 5,
     name: i18n.t("labels.merchant"),
+  },
+];
+
+export const expenseReportSearchTypes = [
+  {
+    id: 1,
+    name: i18n.t("labels.select"),
+  },
+  {
+    id: 1,
+    name: i18n.t("labels.reportNo"),
+  },
+  {
+    id: 2,
+    name: i18n.t("labels.reportName"),
+  },
+  {
+    id: 5,
+    name: i18n.t("labels.name"),
+  },
+  {
+    id: 6,
+    name: i18n.t("labels.lastName"),
+  },
+  {
+    id: 3,
+    name: i18n.t("labels.email"),
+  },
+  {
+    id: 4,
+    name: i18n.t("labels.approverEmail"),
   },
 ];
 
@@ -364,4 +395,6 @@ export const emptyExpenseReport: ExpenseReport = {
   userId: 0,
   vehicle: null,
   workflows: [],
+  note: "",
+  delegatedUserId: "",
 };
