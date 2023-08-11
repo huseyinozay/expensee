@@ -57,6 +57,7 @@ type Expense = {
   id: number;
   name: string;
   approverUserId: number;
+  userId: string;
   amount: number;
   note: string;
   billable: boolean;
@@ -82,7 +83,6 @@ type Expense = {
   attendeesList: Array<string>;
   attendeesNumber: number;
   expenseType: { name: string };
-  userId: number;
 };
 
 interface ExpenseReport {

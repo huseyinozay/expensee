@@ -32,6 +32,7 @@ import {
   saveExpenseReport,
   updateExpenseReport,
 } from "@/app/api/expenseReport";
+import { useUserState } from "@/context/user";
 
 interface ExpenseReportDrawerProps {
   isOpen: boolean;
@@ -44,9 +45,14 @@ export default function ExpenseReportDrawer({
   changeStatus,
   data,
 }: ExpenseReportDrawerProps) {
+  const { user } = useUserState();
   const { t } = useTranslation();
   const { userId } = data;
-  const [user, setUser] = useState<any>();
+  const { delegatedUserId } = user;
+  const delegateUser =
+    delegatedUserId && delegatedUserId !== "None"
+      ? parseInt(delegatedUserId)
+      : null;
   const isAddExpenseReportView = Object.keys(data).length === 0;
   const [selectedExpenseReport, setSelectedExpenseReport] =
     useState<ExpenseReport>(
@@ -138,13 +144,6 @@ export default function ExpenseReportDrawer({
 
       fetchAdvanceReport().then((resp) => setUserAdvanceReport(resp));
       fetchTripReport().then((resp) => setUserTripReport(resp));
-    }
-  }, []);
-
-  useEffect(() => {
-    const userString = localStorage.getItem("user");
-    if (userString) {
-      setUser(JSON.parse(userString));
     }
   }, []);
 

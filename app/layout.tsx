@@ -8,6 +8,7 @@ import QueryProvider from "@/utils/QueryProvider";
 import { isAuthPages } from "@/utils/utils";
 import "@fabrikant-masraff/masraff-core/dist/blocks/blocks.css";
 import "./globals.css";
+import { UserProvider } from "@/context/user";
 
 export default function RootLayout({
   children,
@@ -20,9 +21,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <QueryProvider>
-          <Providers>
-            {isAuthPages(pathname) ? children : <Header>{children}</Header>}
-          </Providers>
+          <UserProvider>
+            <Providers>
+              {isAuthPages(pathname) ? children : <Header>{children}</Header>}
+            </Providers>
+          </UserProvider>
         </QueryProvider>
       </body>
     </html>

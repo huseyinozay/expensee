@@ -302,17 +302,17 @@ export const emptyExpense = {
   expenseTypeId: 0,
   currencyText: "TL",
   isLimitExceeded: false,
-  paymentMethod: 0,
+  paymentMethod: 3,
   tag_Lookup: {},
   conversionAmount: null,
-  sourceType: 2, // 2: Manual
+  sourceType: 2,
   expenseDate: "",
   receiptNumber: "",
   merchant: "",
   reportId: null,
   ohpCodeId: 0,
   attendeesList: [],
-  attendeesNumber: 0,
+  attendeesNumber: 1,
   expenseType: { name: "" },
 };
 

@@ -33,7 +33,6 @@ import {
   statusList,
 } from "@/utils/utils";
 
-
 type InputData = {
   name: string;
   value: number | undefined;
@@ -75,7 +74,7 @@ export default function Expense() {
     isLoading: isLoadingExpenses,
     isFetching: isFetchingExpenses,
     error: expenseError,
-    refetch
+    refetch,
   } = useQuery<ExpenseData>({
     queryKey: ["expenses", filter],
     queryFn: async () => getExpenses(filter),
@@ -135,9 +134,9 @@ export default function Expense() {
     dateInputRef.current?.clearValue();
   };
 
-  useEffect(()=> {
+  useEffect(() => {
     refetch();
-  },[isDrawerOpened])
+  }, [isDrawerOpened]);
 
   return (
     <>
@@ -319,7 +318,13 @@ export default function Expense() {
           </div>
         </>
       )}
-      {isDrawerOpened && <ExpenseDrawer isOpen={isDrawerOpened} changeStatus={changeStatus} data={selectedExpense} />}
+      {isDrawerOpened && (
+        <ExpenseDrawer
+          isOpen={isDrawerOpened}
+          changeStatus={changeStatus}
+          data={selectedExpense}
+        />
+      )}
     </>
   );
 }

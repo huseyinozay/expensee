@@ -40,6 +40,7 @@ import {
   emptyExpense,
   taxPertangeList,
 } from "@/utils/utils";
+import { useUserState } from "@/context/user";
 
 interface DrawerExpenseProps {
   isOpen: boolean;
@@ -52,11 +53,18 @@ export default function ExpenseDrawer({
   changeStatus,
   data,
 }: DrawerExpenseProps) {
+  const { user } = useUserState();
   const { t } = useTranslation();
-  const [user, setUser] = useState<any>();
-  const [userId, setUserId] = useState("0");
-  const [targetCurrency, setTargetCurrency] = useState<any>("");
-  const [delegatedUser, setDelegatedUser] = useState<number | null>(null);
+  const { userId, currency: userTargetCurrency, delegatedUserId } = user;
+  const targetCurrency =
+    userTargetCurrency &&
+    currencyList.find(
+      (currencyType) => currencyType.name === userTargetCurrency
+    );
+  const delegateUser =
+    delegatedUserId && delegatedUserId !== "None"
+      ? parseInt(delegatedUserId)
+      : null;
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const isAddExpenseView = Object.keys(data).length === 0;
   const [selectedExpense, setSelectedExpense] = useState<Expense>(
@@ -195,29 +203,6 @@ export default function ExpenseDrawer({
     exchangeRateData.TargetCurrency,
     exchangeRateData.RateDate,
   ]);
-
-  useEffect(() => {
-    const userString = localStorage.getItem("user");
-    if (userString) {
-      setUser(JSON.parse(userString));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      setUserId(user.userId);
-      const tempDel =
-        user.delegatedUserId && user.delegatedUserId !== "None"
-          ? parseInt(user.delegatedUserId)
-          : null;
-      setDelegatedUser(tempDel);
-      const targetCur = currencyList.find(
-        (currencyType) => currencyType.name === user.currency
-      );
-      //@ts-ignore
-      setTargetCurrency(targetCur);
-    }
-  }, [user]);
 
   return (
     <>
@@ -447,7 +432,7 @@ export default function ExpenseDrawer({
                   fillStyle={MasraffFillStyle.Ghost}
                   colorType={MasraffColorType.Destructive}
                   onMaClick={() => {
-                    deleteExpense(selectedExpense.id, delegatedUser);
+                    deleteExpense(selectedExpense.id, delegateUser);
                     setDeleteModalOpen(false);
                   }}
                 >

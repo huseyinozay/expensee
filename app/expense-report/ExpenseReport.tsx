@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import DataTable from "@/components/DataTable";
@@ -43,6 +43,7 @@ import {
   paymentMethodList,
   statusList,
 } from "@/utils/utils";
+import { useUserState } from "@/context/user";
 
 type InputData = {
   name: string;
@@ -50,8 +51,8 @@ type InputData = {
 };
 
 export default function ExpenseReport() {
+  const { userId } = useUserState();
   const { t } = useTranslation();
-  const [userId, setUserId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenReportDetail, setOpenReportDetail] = useState(false);
   const [reset, setReset] = useState(false);
@@ -108,6 +109,7 @@ export default function ExpenseReport() {
   const { data: waitingApprovalQuery } = useQuery<MasraffResponse>({
     queryKey: ["waitingApprovalReports"],
     queryFn: async () => getWaitingApprovalReports(userId ? userId : ""),
+    enabled: !!userId,
   });
   let waitingApprovalReportsData: Object[] = []; // waiting report type is not defined
   if (waitingApprovalQuery)
@@ -137,6 +139,7 @@ export default function ExpenseReport() {
   const { data: subCompaniesQuery } = useQuery<SubCompany[]>({
     queryKey: ["subCompanies"],
     queryFn: async () => getUserSubCompanies(userId),
+    enabled: !!userId,
   });
 
   let subCompanies: GenericObject[] = [];
@@ -181,11 +184,6 @@ export default function ExpenseReport() {
       setRow(currentRow[0]);
     }
   };
-
-  useEffect(() => {
-    // @ts-ignore
-    setUserId(JSON.parse(window.localStorage.getItem("user")).userId);
-  }, []);
 
   return (
     <>

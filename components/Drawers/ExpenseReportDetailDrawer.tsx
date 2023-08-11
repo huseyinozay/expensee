@@ -14,7 +14,7 @@ import {
   MaGridRow,
 } from "@fabrikant-masraff/masraff-react";
 import { expenseColumns } from "@/utils/data";
-import { useEffect, useState } from "react";
+import { useUserState } from "@/context/user";
 
 interface ExpenseReportDetailDrawerProps {
   isOpen: boolean;
@@ -26,7 +26,8 @@ export default function ExpenseReportDetailDrawer({
   changeStatus,
   data,
 }: ExpenseReportDetailDrawerProps) {
-  const [userId, setUserId] = useState("");
+  const { user } = useUserState();
+  const { userId, currency: userTargetCurrency } = user;
 
   const selectedExpenseReport: ExpenseReport = JSON.parse(JSON.stringify(data));
 
@@ -39,11 +40,6 @@ export default function ExpenseReportDetailDrawer({
   if (expenseReportQuery) {
     expenseReportData = expenseReportQuery.results;
   }
-
-  useEffect(() => {
-    // @ts-ignore
-    setUserId(JSON.parse(window.localStorage.getItem("user")).userId);
-  }, []);
 
   return (
     <>

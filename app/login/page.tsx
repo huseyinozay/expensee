@@ -4,7 +4,7 @@ import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import i18n from "@/i18/i18";
-import { isAuthenticated, loginAsync } from "@/redux/features/user";
+//import { isAuthenticated, loginAsync } from "@/redux/features/user";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
   MasraffColorType,
@@ -14,15 +14,14 @@ import {
   MaButton,
   MaInput,
   MaGridRow,
-  MaGrid
+  MaGrid,
 } from "@fabrikant-masraff/masraff-react";
-
-
+import { useUserState } from "@/context/user";
 
 export default function Login() {
   const dispatch = useAppDispatch();
+  const { login, isAuthenticated } = useUserState();
   const router = useRouter();
-  const isLoggedIn = useAppSelector(isAuthenticated);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,14 +35,15 @@ export default function Login() {
       client_id: "adminApp",
     };
 
-    dispatch(loginAsync(user));
+    //dispatch(loginAsync(user));
+    login(user);
   };
 
   useEffect(() => {
-    if (isLoggedIn) {
-      router.push('/expense')
+    if (isAuthenticated) {
+      router.push("/expense");
     }
-  }, [isLoggedIn]);
+  }, [isAuthenticated]);
 
   return (
     <div
@@ -51,8 +51,7 @@ export default function Login() {
         "full-screen login-background ma-display-flex ma-display-flex-align-items-center ma-display-flex-justify-content-center"
       }
     >
-   
-      <MaGrid rows={4} style={{width: '50%',height:'50%'}}>
+      <MaGrid rows={4} style={{ width: "50%", height: "50%" }}>
         <MaGridRow>
           <div className={"image-container ma-size-margin-bottom-32"}>
             <Image
@@ -94,7 +93,6 @@ export default function Login() {
           </form>
         </MaGridRow>
       </MaGrid>
-      
     </div>
   );
 }
