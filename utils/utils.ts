@@ -396,5 +396,5 @@ export const emptyExpenseReport: ExpenseReport = {
   vehicle: null,
   workflows: [],
   note: "",
-  delegatedUserId: "",
+  delegatedUserId: null,
 };

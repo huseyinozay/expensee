@@ -63,9 +63,7 @@ export default function ExpenseReportDetailDrawer({
   }
 
   const approveReport = (report: ExpenseReport) => {
-    console.log("approve or decline : ", approveOrDecline);
     report.status = 3;
-    console.log("report : ", report);
     updateReport.mutate(report);
   };
 
@@ -75,7 +73,6 @@ export default function ExpenseReportDetailDrawer({
   };
 
   const sendToApproval = (report: ExpenseReport) => {
-    report.delegatedUserId = delegatedUserId;
     report.status = 2;
     updateReport.mutate(report);
   };
