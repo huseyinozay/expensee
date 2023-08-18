@@ -1,17 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import i18n from "@/i18/i18";
 import Dropdown from "@/components/Dropdown";
-import DataTable from "@/components/DataTable";
+import { statusList } from "@/utils/utils";
 import {
-  getExpenseCategoryData,
-  getExpenses,
-  getTagData,
-} from "../api/expense";
-import { Loading } from "@/components/Loading/Loading";
-import ExpenseDrawer from "@/components/Drawers/ExpenseDrawer";
+  MasraffColorType,
+  MasraffSpacerSize,
+} from "@fabrikant-masraff/masraff-core";
 import {
   MaAccordion,
   MaButton,
@@ -21,108 +15,98 @@ import {
   MaSeparator,
   MaSpacer,
 } from "@fabrikant-masraff/masraff-react";
+import React, { use, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  MasraffColorType,
-  MasraffSpacerSize,
-} from "@fabrikant-masraff/masraff-core";
-import {
-  filterObjectsByIdAndName,
-  getFormattedExpenseData,
-} from "@/utils/helpers";
-import { expenseColumns } from "@/utils/data";
-import {
-  expenseSearchTypes,
-  paymentMethodList,
-  statusList,
-} from "@/utils/utils";
-import "../globals.css";
+  getCustomReportTypes,
+  getCustomReportsView,
+} from "../api/expenseCustomReport";
+import { filterObjectsByIdAndName } from "@/utils/helpers";
+import { useQuery } from "@tanstack/react-query";
+import { Loading } from "@/components/Loading/Loading";
+import { customFormColumns, expenseColumns } from "@/utils/data";
+import DataTable from "@/components/DataTable";
 
-import Image from "next/image";
+const ExpenseCustomReport = () => {
+  const { t } = useTranslation();
 
-type InputData = {
-  name: string;
-  value: number | undefined;
-};
-
-export default function Expense() {
   const [currentPage, setCurrentPage] = useState(0);
   const defaultFilter = {
-    includes: "user, expenseType",
+    includes: "user,approver,subCompany",
     clientId: "adminApp",
     page: currentPage,
     pageSize: 10,
     ascending: "false",
-    searchTypeId: 0,
   };
   const [filter, setFilter] = useState<{ [key: string]: any }>(defaultFilter);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  const [isDrawerOpened, setDrawerOpened] = useState(false);
+  const [selectedForm, setSelectedForm] = useState({});
   const [filterData, setFilterData] = useState<{
     [key: string]: number | string;
   }>({});
-  const [isDrawerOpened, setDrawerOpened] = useState(false);
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState({});
   const [reset, setReset] = useState(false);
 
   const inputRef = useRef<any>();
   const dateInputRef = useRef<any>();
+
   const rowBlock =
     "ma-display-flex ma-display-flex-row ma-display-flex-align-items-center ma-size-padding-bottom-16";
   const today = new Date();
-  const min = new Date(
+  const minDate = new Date(
     today.getFullYear() - 5,
     today.getMonth(),
     today.getDate()
   );
-  const max = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const maxDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
 
   const {
-    data: expenseData,
-    isLoading: isLoadingExpenses,
-    isFetching: isFetchingExpenses,
-    error: expenseError,
+    data: customForms,
+    isLoading: isLoadingCustomForms,
     refetch,
-  } = useQuery<ExpenseData>({
-    queryKey: ["expenses", filter],
-    queryFn: async () => getExpenses(filter),
+  } = useQuery<CustomExpenseFormData>({
+    queryKey: ["customReports", filter],
+    queryFn: async () => getCustomReportsView(filter),
   });
 
-  const { data: tagData } = useQuery<TagData>({
-    queryKey: ["tags"],
-    queryFn: async () => getTagData(),
+  const { data: customFormTypesData } = useQuery<CustomFormType[]>({
+    queryKey: ["reportTypes"],
+    queryFn: async () => getCustomReportTypes(),
   });
-  let tags: GenericObject[] = [];
-  if (tagData) tags = filterObjectsByIdAndName(tagData.results);
-
-  const { data: expenseCategoryData } = useQuery<any[]>({
-    queryKey: ["categories"],
-    queryFn: async () => getExpenseCategoryData(),
-  });
-  let expenseCategories: GenericObject[] = [];
-  if (expenseCategoryData)
-    expenseCategories = filterObjectsByIdAndName(expenseCategoryData);
+  let customFormTypes: GenericObject[] = [];
+  if (customFormTypesData)
+    customFormTypes = filterObjectsByIdAndName(customFormTypesData);
 
   const changeStatus: any = (isOpen: boolean) => {
     setDrawerOpened(isOpen);
-    setSelectedExpense({});
+    setSelectedForm({});
   };
 
-  const onClickExpenseDetail: any = (id: any) => {
-    if (expenseData) {
-      const currentRow = expenseData.results.filter(
+  const onClickFormDetail: any = (id: any) => {
+    if (customForms) {
+      const currentRow = customForms.results.filter(
         (item: any) => item.id === id
       );
-      setSelectedExpense(currentRow[0]);
+      setSelectedForm(currentRow[0]);
     }
   };
 
   const input = (data: SelectionData) => {
-    const tempFilterData = { ...filterData };
-    if (data.value !== undefined) {
-      tempFilterData[data.name] = data.value;
-    } else if (data.value === undefined) {
-      delete tempFilterData[data.name];
-    }
-    setFilterData(tempFilterData);
+    setFilterData((prevFilter) => {
+      if (data.value === undefined) {
+        const { [data.name]: _, ...rest } = prevFilter;
+        return rest;
+      }
+
+      return {
+        ...prevFilter,
+        [data.name]: data.value,
+      };
+    });
   };
 
   const setDateRange = (data: Array<Date | undefined>) => {
@@ -143,32 +127,18 @@ export default function Expense() {
     inputRef.current?.clearValue();
     dateInputRef.current?.clearValue();
   };
-
-  useEffect(() => {
-    refetch();
-  }, [isDrawerOpened]);
-
   return (
-    <>
-      <h4 style={{ borderBottom: "2px solid #fbd14b ", height: "50px" }}>
-        {i18n.t("labels.expenses")}
+    <div>
+      <h4 style={{ borderBottom: "2px solid #6a60a9 ", height: "50px" }}>
+        {t("labels.requestForms")}
       </h4>
       <MaSpacer size={MasraffSpacerSize.M} />
 
       <MaButton
-        onMaClick={() => {
-          changeStatus(true);
-          setSelectedExpense({});
-        }}
-        className="ma-size-padding-right-16"
-      >
-        {i18n.t("labels.add")}
-      </MaButton>
-      <MaButton
         onMaClick={() => setIsAccordionOpen(!isAccordionOpen)}
         colorType={MasraffColorType.Primary}
       >
-        {i18n.t("labels.filter")}
+        {t("labels.filter")}
       </MaButton>
 
       <MaAccordion isOpen={isAccordionOpen}>
@@ -189,8 +159,8 @@ export default function Expense() {
               <div className={`${rowBlock}`}>
                 <MaDateRangeInput
                   locale="tr"
-                  min={min}
-                  max={max}
+                  min={minDate}
+                  max={maxDate}
                   className="ma-custom-filter-date-input-class"
                   fullWidth={true}
                   popoverPlacement="bottom"
@@ -203,18 +173,8 @@ export default function Expense() {
                 <MaSpacer size={MasraffSpacerSize.M} orientation="horizontal" />
               </div>
               <div className={`${rowBlock}`}>
-                <Dropdown
-                  input={input}
-                  placeholder="Türü"
-                  selectData={expenseSearchTypes}
-                  valueName="type"
-                  reset={reset}
-                />
-                <MaSpacer size={MasraffSpacerSize.S} orientation="horizontal" />
-              </div>
-              <div className={`${rowBlock}`}>
                 <MaInput
-                  placeholder="Aranacak Değer"
+                  placeholder="Form Adı,E-posta veya Form No"
                   className="Ma-custom-select-class"
                   slot="select-target"
                   onMaChange={(e) => {
@@ -229,7 +189,7 @@ export default function Expense() {
               <div className={`${rowBlock}`}>
                 <Dropdown
                   input={input}
-                  placeholder="Durumu"
+                  placeholder={t("labels.status")}
                   selectData={statusList}
                   valueName="statuses"
                   reset={reset}
@@ -239,33 +199,14 @@ export default function Expense() {
               <div className={`${rowBlock}`}>
                 <Dropdown
                   input={input}
-                  placeholder="Ödeme Tipi"
-                  selectData={paymentMethodList}
-                  valueName="paymentMethodTypes"
+                  placeholder={t("labels.type")}
+                  selectData={customFormTypes}
+                  valueName="type"
                   reset={reset}
                 />
                 <MaSpacer size={MasraffSpacerSize.S} orientation="horizontal" />
               </div>
-              <div className={`${rowBlock}`}>
-                <Dropdown
-                  input={input}
-                  placeholder="Etiket"
-                  selectData={tags}
-                  valueName="tagIds"
-                  reset={reset}
-                />
-                <MaSpacer size={MasraffSpacerSize.S} orientation="horizontal" />
-              </div>
-              <div className={`${rowBlock}`}>
-                <Dropdown
-                  input={input}
-                  placeholder="Kategori"
-                  selectData={expenseCategories}
-                  valueName="expenseTypeId"
-                  reset={reset}
-                />
-                <MaSpacer size={MasraffSpacerSize.S} orientation="horizontal" />
-              </div>
+
               <div className={`${rowBlock}`}>
                 <MaButton
                   colorType={MasraffColorType.Primary}
@@ -274,10 +215,10 @@ export default function Expense() {
                   }}
                   className="ma-size-padding-right-8"
                 >
-                  {i18n.t("labels.search")}
+                  {t("labels.search")}
                 </MaButton>
                 <MaButton onMaClick={resetFilterData}>
-                  {i18n.t("labels.clear")}
+                  {t("labels.clear")}
                 </MaButton>
 
                 <MaSpacer size={MasraffSpacerSize.S} orientation="horizontal" />
@@ -289,54 +230,56 @@ export default function Expense() {
 
       <MaSpacer size={MasraffSpacerSize.M} />
 
-      {isLoadingExpenses ? (
+      {isLoadingCustomForms ? (
         <Loading />
       ) : (
         <>
-          {expenseData && (
+          {customForms && (
             <DataTable
-              column={expenseColumns}
-              data={getFormattedExpenseData(expenseData?.results)}
+              column={customFormColumns}
+              data={customForms.results}
               changeStatus={changeStatus}
-              setRowId={onClickExpenseDetail}
+              setRowId={onClickFormDetail}
             />
           )}
           <div style={{ padding: "10px" }}>
             <p>
-              {i18n.t("labels.page")} {currentPage + 1}/
-              {expenseData?.totalPages}
+              {t("labels.page")} {currentPage + 1}/{customForms?.totalPages}
             </p>
             <p style={{ paddingTop: "5px" }}>
-              {i18n.t("labels.totalResult")}: {expenseData?.totalCount}
+              {t("labels.totalResult")}: {customForms?.totalCount}
             </p>
             <MaButton
               style={{ paddingRight: "5px", paddingTop: "5px" }}
               onMaClick={() => {
                 if (currentPage === 0) return;
-                filter.page = currentPage - 1;
+                setFilter((prevFilter) => ({
+                  ...prevFilter,
+                  page: currentPage - 1,
+                }));
+
                 setCurrentPage(currentPage - 1);
               }}
             >
-              {i18n.t("labels.previous")}
+              {t("labels.previous")}
             </MaButton>
             <MaButton
               onMaClick={() => {
-                filter.page = currentPage + 1;
+                setFilter((prevFilter) => ({
+                  ...prevFilter,
+                  page: currentPage + 1,
+                }));
+
                 setCurrentPage(currentPage + 1);
               }}
             >
-              {i18n.t("labels.next")}
+              {t("labels.next")}
             </MaButton>
           </div>
         </>
       )}
-      {isDrawerOpened && (
-        <ExpenseDrawer
-          isOpen={isDrawerOpened}
-          changeStatus={changeStatus}
-          data={selectedExpense}
-        />
-      )}
-    </>
+    </div>
   );
-}
+};
+
+export default ExpenseCustomReport;

@@ -25,9 +25,14 @@ const Sidebar = () => {
       title: "labels.expenseReports",
       icon: "Document",
     },
+    {
+      href: "/expense-custom-report",
+      title: "labels.requestForms",
+      icon: "DocumentArrowUp",
+    }
   ];
   return (
-    <div>
+    <div style={{paddingTop:'20px'}}>
       <MaTree>
         {menuItems.map(({ href, title, icon }) => (
           <div key={title}>

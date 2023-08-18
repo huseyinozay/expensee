@@ -15,6 +15,18 @@ interface ExpenseData extends MasraffResponse {
   allExpenseIds: Array<number>;
 }
 
+interface CustomExpenseFormData extends MasraffResponse {
+  enableReportIdsForExport: number[];
+}
+
+interface CustomFormType {
+  id: number;
+  companyId: number;
+  name: string;
+  createDate: Date;
+  status: number;
+}
+
 interface TagData extends MasraffResponse {
   results: GenericObject[];
 }
@@ -64,16 +76,17 @@ type Expense = {
   tag_LookupId: number;
   status: number;
   taxPercentage: number;
-  taxAmount: string;
-  currencyRate: string;
+  taxAmount: number;
+  currencyRate: number;
   reimbursable: boolean;
+  customFields: any[];
   currency: number;
   expenseTypeId: number;
   currencyText: string | undefined;
   isLimitExceeded: boolean;
   paymentMethod: number;
   tag_Lookup: Object;
-  conversionAmount: string;
+  conversionAmount: number;
   sourceType: number;
   expenseDate: string;
   receiptNumber: string;
@@ -137,8 +150,20 @@ interface ExpenseReport {
   delegatedUserId: string | null;
 }
 
+type CreateReport = {
+  name: string;
+  delegatedUserId: string | null;
+  subCompanyId: number | null;
+  user: Object;
+};
+
 type ExchangeRate = {
   SourceCurrency: number;
   TargetCurrency: number;
   RateDate: Date;
 };
+
+interface SelectionData {
+  name: string;
+  value: number | undefined;
+}

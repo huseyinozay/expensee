@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useUserState } from "@/context/user";
 import {
   getIndividualExpenseReport,
   updateExpenseReportStatus,
@@ -8,7 +11,6 @@ import {
 import {
   MasraffColorType,
   MasraffFillStyle,
-  MasraffIconNames,
   MasraffSpacerSize,
 } from "@fabrikant-masraff/masraff-core";
 import DataTable from "@/components/DataTable";
@@ -23,16 +25,13 @@ import {
   MaDrawerHeader,
   MaGrid,
   MaGridRow,
-  MaIcon,
   MaSpacer,
   MaText,
   MaTextArea,
 } from "@fabrikant-masraff/masraff-react";
 import { expenseColumns } from "@/utils/data";
-import { useUserState } from "@/context/user";
-import { deleteExpense } from "@/app/api/expense";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { getFormattedExpenseData } from "@/utils/helpers";
+import QRCode from "react-qr-code";
 
 interface ExpenseReportDetailDrawerProps {
   isOpen: boolean;
@@ -46,7 +45,7 @@ export default function ExpenseReportDetailDrawer({
 }: ExpenseReportDetailDrawerProps) {
   const { t } = useTranslation();
   const { user } = useUserState();
-  const { userId, currency: userTargetCurrency, delegatedUserId } = user;
+  const { userId } = user;
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [approveOrDecline, setApproveOrDecline] = useState(false);
 
@@ -84,12 +83,15 @@ export default function ExpenseReportDetailDrawer({
     },
   });
 
+  const rowBlock =
+    "ma-display-flex ma-display-flex-row ma-display-flex-align-items-center";
+
   return (
     <>
       <MaDrawer isOpen={isOpen} onMaClose={() => changeStatus(false)}>
         <MaDrawerHeader>{selectedExpenseReport.name}</MaDrawerHeader>
         <MaDrawerContent>
-          <MaGrid rows={4}>
+          <MaGrid rows={1}>
             <MaGridRow>
               {parseInt(userId) === selectedExpenseReport.approverUserId &&
                 selectedExpenseReport.status === 2 && (
@@ -125,11 +127,35 @@ export default function ExpenseReportDetailDrawer({
               {isLoadingExpenseReport ? (
                 <Loading />
               ) : (
-                <div style={{ marginTop: "25px" }}>
-                  <DataTable data={expenseReportData} column={expenseColumns} />
+                <div style={{ marginTop: "25px", maxWidth: "600px" }}>
+                  <DataTable
+                    data={getFormattedExpenseData(expenseReportData)}
+                    column={expenseColumns}
+                  />
                 </div>
               )}
             </MaGridRow>
+            <MaSpacer size={MasraffSpacerSize.Xs} />
+            <div
+              className={`${rowBlock} ma-display-flex-justify-content-spacebetween ma-display-fullwidth`}
+            >
+              <div>
+                <MaText>
+                  <MaText className="ma-body-text-weight-bold">
+                    {t("labels.totalAmount")}:
+                  </MaText>{" "}
+                  {selectedExpenseReport.totalAmount}{" "}
+                  {selectedExpenseReport.currencyText}
+                </MaText>
+              </div>
+              <div>
+                <QRCode
+                  size={128}
+                  viewBox={`0 0 128 128`}
+                  value={String(selectedExpenseReport.id)}
+                />
+              </div>
+            </div>
           </MaGrid>
         </MaDrawerContent>
         {isApproveModalOpen && (

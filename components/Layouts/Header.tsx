@@ -2,17 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import { NextPage } from "next";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { useAppDispatch } from "@/redux/hooks";
+import { logoutUser } from "@/redux/features/user";
+import Sidebar from "./Sidebar";
 import {
   MasraffColorType,
   MasraffSpacerSize,
 } from "@fabrikant-masraff/masraff-core";
 import { MaButton, MaSpacer, MaText } from "@fabrikant-masraff/masraff-react";
-import Sidebar from "./Sidebar";
 import styles from "./index.module.css";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { logoutUser, selectUser } from "@/redux/features/user";
-import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -33,7 +33,9 @@ const Header: NextPage<HeaderProps> = ({ children }) => {
 
   return (
     <div className="full-screen">
-      <div className="header-main ma-default-background ma-size-padding-left-16 ma-size-padding-right-16 ma-elevation-shadow-one ma-display-flex ma-display-flex-row ma-display-flex-justify-content-spacebetween">
+      <div
+        className={`${styles.header} ma-default-background ma-size-padding-left-16 ma-size-padding-right-16 ma-elevation-shadow-one ma-display-flex ma-display-flex-row ma-display-flex-justify-content-spacebetween`}
+      >
         <div className={`${rowBlockClassname}`}>
           <MaSpacer size={MasraffSpacerSize.S} orientation="horizontal" />
           <h3 className="ma-ultraviolet-color ma-body-text-weight-bold">
@@ -59,9 +61,9 @@ const Header: NextPage<HeaderProps> = ({ children }) => {
         </div>
       </div>
 
-      <div className="ma-display-flex">
+      <div style={{marginTop:'50px'}} className="ma-display-flex">
         <div className={styles.sidebarColumn}>
-          <div style={{ marginTop: "50px" }}>
+          <div>
             <Sidebar />
           </div>
         </div>

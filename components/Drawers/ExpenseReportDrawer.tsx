@@ -22,9 +22,10 @@ import { useTranslation } from "react-i18next";
 import Dropdown from "@/components/Dropdown";
 import { allReadyExpenseColumns } from "@/utils/data";
 import DataTable from "@/components/DataTable";
-import { emptyExpenseReport } from "@/utils/utils";
+import { emptyCreateReport } from "@/utils/utils";
 import { filterObjectsByIdAndName } from "@/utils/helpers";
 import {
+  addExpensesToReport,
   getAlreadyExpenses,
   getUserAdvanceReport,
   getUserSubCompanies,
@@ -48,8 +49,8 @@ export default function ExpenseReportDrawer({
   const { user } = useUserState();
   const { t } = useTranslation();
   const { userId } = data;
-  const { delegatedUserId } = user;
-  const delegateUser =
+  let { delegatedUserId } = user;
+  delegatedUserId =
     delegatedUserId && delegatedUserId !== "None"
       ? parseInt(delegatedUserId)
       : null;
@@ -57,7 +58,7 @@ export default function ExpenseReportDrawer({
   const [selectedExpenseReport, setSelectedExpenseReport] =
     useState<ExpenseReport>(
       isAddExpenseReportView
-        ? emptyExpenseReport
+        ? emptyCreateReport
         : JSON.parse(JSON.stringify(data))
     );
   const [userAdvanceReport, setUserAdvanceReport] = useState<AdvanceReport[]>(
@@ -67,6 +68,7 @@ export default function ExpenseReportDrawer({
     userTripReportList: [],
     isEnableForExpenseReport: false,
   });
+  const [expenseList, setExpenseList] = useState<Expense[]>([]);
 
   const { data: alreadyExpenseQuery } = useQuery({
     queryKey: ["expenses"],
@@ -95,14 +97,24 @@ export default function ExpenseReportDrawer({
     },
   });
 
-  const addExpenseReport = () => {
+  const addExpenseReport = async () => {
     const tempExpenseReport = { ...selectedExpenseReport };
     tempExpenseReport.user = user;
+    let tempExpenseList;
+    if (alreadyExpenseQuery) {
+      tempExpenseList = alreadyExpenseQuery.filter((expense) => {
+        //@ts-ignore
+        if (expenseList.includes(expense.id)) return expense;
+      });
+    }
+    const response = await saveExpenseReport(tempExpenseReport);
     //@ts-ignore
-    tempExpenseReport.user = user;
-    saveExpenseReport(tempExpenseReport)
-      .then(() => changeStatus(false))
-      .catch(() => console.log("Saving expense report error"));
+    if (response) {
+      //@ts-ignore
+      await addExpensesToReport(response.id, tempExpenseList, delegatedUserId)
+        .then(() => changeStatus(false))
+        .catch(() => console.log("Saving expense report error"));
+    }
   };
 
   const handleChange = (data: DropdownSelection) => {
@@ -113,7 +125,7 @@ export default function ExpenseReportDrawer({
         (company) => company.id === data.value
       );
       if (changedSubCompany) {
-        tempExpenseReport.subCompanyName = changedSubCompany.name;
+        // tempExpenseReport.subCompanyName = changedSubCompany.name;
         tempExpenseReport.subCompanyId = changedSubCompany.id;
       }
     } else {
@@ -135,6 +147,20 @@ export default function ExpenseReportDrawer({
         : e.target.value;
     });
     setSelectedExpenseReport(tempExpenseReport);
+    console.log(selectedExpenseReport);
+  };
+
+  const onClickExpenseSelect: any = (id: any) => {
+    const selected = expenseList.find((expense: any) => expense === id);
+    if (selected) {
+      const filteredExpenseList = expenseList.filter(
+        (expense: any) => expense !== id
+      );
+      setExpenseList(filteredExpenseList);
+      return;
+    } else {
+      setExpenseList([...expenseList, id]);
+    }
   };
 
   useEffect(() => {
@@ -199,22 +225,31 @@ export default function ExpenseReportDrawer({
                   selectData={userAdvanceReport}
                   valueName="advanceReport"
                 />
-                <MaText className="ma-display-flex ma-size-margin-bottom-8 ma-size-margin-top-8">
-                  {t("labels.totalAmount")}
-                </MaText>
-                <MaInput
-                  fullWidth
-                  value={String(selectedExpenseReport.totalAmount)}
-                  onMaChange={(el) => handleInputChange(el, ["name"])}
-                ></MaInput>
+                {!isAddExpenseReportView && (
+                  <>
+                    <MaText className="ma-display-flex ma-size-margin-bottom-8 ma-size-margin-top-8">
+                      {t("labels.totalAmount")}
+                    </MaText>
+                    <MaInput
+                      fullWidth
+                      value={String(selectedExpenseReport.totalAmount)}
+                      onMaChange={(el) =>
+                        handleInputChange(el, ["totalAmount"])
+                      }
+                    ></MaInput>
+                  </>
+                )}
               </form>
 
               {alreadyExpenseQuery && isAddExpenseReportView && (
-                <DataTable
-                  column={allReadyExpenseColumns}
-                  data={alreadyExpenseQuery}
-                  multiSelect={true}
-                />
+                <div style={{ marginTop: "25px", maxWidth: "600px" }}>
+                  <DataTable
+                    column={allReadyExpenseColumns}
+                    data={alreadyExpenseQuery}
+                    multiSelect={true}
+                    setRowId={onClickExpenseSelect}
+                  />
+                </div>
               )}
             </MaGridRow>
           </MaGrid>

@@ -10,6 +10,8 @@ import {
   MaIcon,
   MaCheckbox,
 } from "@fabrikant-masraff/masraff-react";
+import "../app/globals.css";
+import Image from "next/image";
 
 type Column = {
   field: string;
@@ -19,6 +21,7 @@ type Column = {
 type DataTableProps = {
   column: Array<Column>;
   data: Array<Object>;
+  isInteractive?: boolean;
   changeStatus?(arg: boolean): void;
   changeStatus2?(arg: boolean): void;
   hasSecondaryInteraction?: boolean;
@@ -57,6 +60,7 @@ export default function DataTable({
   data,
   changeStatus = () => {},
   changeStatus2 = () => {},
+  isInteractive = true,
   hasSecondaryInteraction = false,
   setRowId = () => {},
   multiSelect = false,
@@ -72,10 +76,33 @@ export default function DataTable({
     <MaDisplayTable size={MasraffSize.Normal}>
       <MaDisplayTableBody>
         <MaDisplayTableRow sticky={true} header={true}>
-          <MaDisplayTableCell columnId="actions"></MaDisplayTableCell>
+          <MaDisplayTableCell
+            style={{
+              wordBreak: "normal",
+              overflowWrap: "break-word",
+              minWidth: "130px",
+              justifyContent: "center",
+              alignItems: "center",
+              textAlign: "center",
+              height: "50px",
+            }}
+            columnId="actions"
+          ></MaDisplayTableCell>
           {column.map((hv) => {
             return (
-              <MaDisplayTableCell key={hv.field} columnId={hv.field}>
+              <MaDisplayTableCell
+                style={{
+                  wordBreak: "normal",
+                  overflowWrap: "break-word",
+                  minWidth: "100px",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                  height: "50px",
+                }}
+                key={hv.field}
+                columnId={hv.field}
+              >
                 {t(hv.title)}
               </MaDisplayTableCell>
             );
@@ -86,49 +113,83 @@ export default function DataTable({
           .map((row: any) => {
             return (
               <MaDisplayTableRow key={row?.id}>
-                <MaDisplayTableCell key={row?.id} columnId="actions">
-                  {!multiSelect ? (
+                <MaDisplayTableCell
+                  style={{
+                    wordBreak: "normal",
+                    overflowWrap: "break-word",
+                    minWidth: "130px",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                    height: "45px",
+                  }}
+                  key={row?.id}
+                  columnId="actions"
+                >
+                  {isInteractive ? (
                     <div>
-                      <MaButton
-                        size={MasraffSize.Small}
-                        onMaClick={() => {
-                          changeStatus(true);
-                          setRowId(row?.id);
-                        }}
-                      >
-                        <MaIcon
-                          size={hasSecondaryInteraction ? 18 : 24}
-                          iconName={MasraffIconNames.Pencil}
-                        />
-                      </MaButton>
-                      {hasSecondaryInteraction && (
-                        <MaButton
-                          size={MasraffSize.Small}
+                      {!multiSelect ? (
+                        <div>
+                          <MaButton
+                            size={MasraffSize.Small}
+                            onMaClick={() => {
+                              changeStatus(true);
+                              setRowId(row?.id);
+                            }}
+                          >
+                            <MaIcon
+                              size={hasSecondaryInteraction ? 18 : 24}
+                              iconName={MasraffIconNames.Pencil}
+                            />
+                          </MaButton>
+                          {hasSecondaryInteraction && (
+                            <MaButton
+                              style={{ marginLeft: "5px" }}
+                              size={MasraffSize.Small}
+                              onMaClick={() => {
+                                changeStatus2(true);
+                                setRowId(row?.id);
+                              }}
+                            >
+                              <MaIcon
+                                size={18}
+                                iconName={MasraffIconNames.Repository}
+                              />
+                            </MaButton>
+                          )}
+                        </div>
+                      ) : (
+                        <MaCheckbox
                           onMaClick={() => {
-                            changeStatus2(true);
                             setRowId(row?.id);
                           }}
-                        >
-                          <MaIcon
-                            size={18}
-                            iconName={MasraffIconNames.Repository}
-                          />
-                        </MaButton>
+                        ></MaCheckbox>
                       )}
                     </div>
                   ) : (
-                    <MaCheckbox
-                      onMaClick={() => {
-                        setRowId(row?.id);
-                      }}
-                    ></MaCheckbox>
+                    <MaIcon
+                      size={24}
+                      iconName={MasraffIconNames.CircleInfoSymbol}
+                    />
                   )}
                 </MaDisplayTableCell>
                 {Object.entries(row)
                   .filter((row) => fields.includes(row[0]))
                   .map((en) => {
                     return (
-                      <MaDisplayTableCell key={en[0]} columnId={en[0]}>
+                      <MaDisplayTableCell
+                        style={{
+                          wordBreak: "normal",
+                          overflowWrap: "break-word",
+                          minWidth: "130px",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          textAlign: "center",
+                          height: "45px",
+                        }}
+                        key={en[0]}
+                        columnId={en[0]}
+                      >
                         {/* @ts-ignore */}
                         <div dangerouslySetInnerHTML={{ __html: en[1] }} />
                       </MaDisplayTableCell>

@@ -3,14 +3,18 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useUserState } from "@/context/user";
 import {
   changeExchangeRate,
   deleteExpense,
+  divideExpense,
   getExpenseCategoryData,
   getUserOhpCodeDataList,
   saveExpense,
   updateExpense,
 } from "@/app/api/expense";
+import DataTable from "../DataTable";
+import ExpenseDividerDrawer from "./ExpenseDividerDrawer";
 import Dropdown from "@/components/Dropdown";
 import {
   MaInputCustomEvent,
@@ -24,6 +28,7 @@ import {
   MaDialog,
   MaDialogContent,
   MaDialogFooter,
+  MaDialogHeader,
   MaDrawer,
   MaDrawerContent,
   MaDrawerFooter,
@@ -33,14 +38,18 @@ import {
   MaInput,
   MaText,
 } from "@fabrikant-masraff/masraff-react";
-import { filterObjectsByIdAndName } from "@/utils/helpers";
+import {
+  filterObjectsByIdAndName,
+  filterObjectsByIdAndValue,
+  getFormattedExpenseData,
+} from "@/utils/helpers";
 import {
   availablePaymentMethods,
   currencyList,
   emptyExpense,
   taxPertangeList,
 } from "@/utils/utils";
-import { useUserState } from "@/context/user";
+import { expenseColumnsSimplified } from "@/utils/data";
 
 interface DrawerExpenseProps {
   isOpen: boolean;
@@ -66,10 +75,15 @@ export default function ExpenseDrawer({
       ? parseInt(delegatedUserId)
       : null;
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [openDivideModal, setOpenDivideModal] = useState(false);
+  const [isDividerDrawerOpen, setDividerDrawerOpen] = useState(false);
   const isAddExpenseView = Object.keys(data).length === 0;
   const [selectedExpense, setSelectedExpense] = useState<Expense>(
     isAddExpenseView ? emptyExpense : JSON.parse(JSON.stringify(data))
   );
+  const [dividedExpenseState, setDividedExpenseState] = useState<Expense[]>([
+    JSON.parse(JSON.stringify(data)),
+  ]);
   const [exchangeRateData, setExchangeRateData] = useState({
     SourceCurrency: selectedExpense.currency,
     TargetCurrency: targetCurrency?.id,
@@ -83,14 +97,6 @@ export default function ExpenseDrawer({
     currency: expenseCurrency,
     expenseDate,
   } = selectedExpense;
-
-  useEffect(() => {
-    setExchangeRateData({
-      SourceCurrency: expenseCurrency,
-      TargetCurrency: targetCurrency?.id,
-      RateDate: !expenseDate ? new Date() : expenseDate,
-    });
-  }, [expenseCurrency, targetCurrency, expenseDate]);
 
   const { data: ohpCodeQuery } = useQuery<OhpCodeData[]>({
     queryKey: ["ohpCode"],
@@ -118,13 +124,105 @@ export default function ExpenseDrawer({
     queryFn: async () => fetchCustomFieldData(),
   }); */
 
+  const handleCustomFieldsChange = (
+    event: any,
+    index: number,
+    type: string = "not date"
+  ) => {
+    const tempExpense = { ...selectedExpense };
+    if (type === "date") {
+      if (
+        JSON.stringify(event.target.value) ===
+        JSON.stringify(
+          new Date(selectedExpense.customFields[index].customValue)
+        )
+      )
+        return;
+      if (typeof event.target.value === "object") {
+        let rawDate = event.target.value.toString();
+        rawDate = new Date(event.target.value);
+        const date = rawDate.toISOString();
+        tempExpense.customFields[index].customValue = date;
+      }
+    } else {
+      tempExpense.customFields[index].customValue = event.target.value;
+    }
+    setSelectedExpense(tempExpense);
+  };
+
+  const renderCustomFields = (field: any, index: number) => {
+    const textOfCustomField = (
+      <MaText className="ma-display-flex ma-size-margin-bottom-8 ma-size-margin-top-8">
+        {field.fieldName}
+      </MaText>
+    );
+    let inputElement;
+    switch (field.valueType) {
+      case 0:
+        inputElement = (
+          <MaInput
+            fullWidth
+            onMaInput={(e) => handleCustomFieldsChange(e, index)}
+            value={field.customValue ? String(field.customValue) : ""}
+          />
+        );
+        break;
+      case 1:
+        inputElement = (
+          <MaInput
+            fullWidth
+            value={field.customValue ? String(field.customValue) : ""}
+            type="number"
+            showInputError={false}
+            onMaInput={(e) => handleCustomFieldsChange(e, index)}
+          ></MaInput>
+        );
+        break;
+      case 3:
+        inputElement = (
+          <div style={{ color: "Red" }}>
+            {/* <MaDateInput
+              fullWidth
+              max={new Date()}
+              value={
+                !field.customValue ? undefined : new Date(field.customValue)
+              }
+              onMaDateChange={(e) => handleCustomFieldsChange(e, index, "date")}
+              shouldCloseOnSelect
+            /> */}
+            After solving blocksfabrikk bug, date input will come here
+          </div>
+        );
+        break;
+      case 4:
+        inputElement = (
+          <Dropdown
+            input={handleChange}
+            placeholder={
+              field.customValue ? String(field.customValue) : t("labels.select")
+            }
+            selectData={filterObjectsByIdAndValue(field.customFieldValues)}
+            valueName="customField"
+          />
+        );
+        break;
+    }
+
+    return (
+      <div>
+        {textOfCustomField}
+        {inputElement}
+      </div>
+    );
+  };
+
   const mutateExchangeRate = useMutation(changeExchangeRate, {
     onSuccess: (data: number) => {
       const tempExpense = { ...selectedExpense };
       const tempCurrencyRate = data;
-      tempExpense.currencyRate = tempCurrencyRate.toString();
+      tempExpense.currencyRate = tempCurrencyRate;
       const tempconversionAmount = data * selectedExpense.amount;
-      tempExpense.conversionAmount = tempconversionAmount.toString();
+      tempExpense.conversionAmount = tempconversionAmount;
       setSelectedExpense(tempExpense);
     },
   });
@@ -146,7 +244,6 @@ export default function ExpenseDrawer({
   };
 
   const handleChange = (data: DropdownSelection) => {
-    console.log("kafa karisikligi::", data);
     const tempExpense = { ...selectedExpense };
     if (data.name === "expenseTypeId") {
       const changedCategory = expenseCategoryData?.find(
@@ -156,8 +253,7 @@ export default function ExpenseDrawer({
       tempExpense.expenseTypeId = changedCategory.id;
     }
     if (data.name === "taxPercentage") {
-      const tempTax = (tempExpense.amount * data.value) / 100;
-      tempExpense.taxAmount = tempTax.toString();
+      tempExpense.taxAmount = (tempExpense.amount * data.value) / 100;
     }
 
     //@ts-ignore
@@ -167,14 +263,19 @@ export default function ExpenseDrawer({
 
   const handleInputChange = (e: MaInputCustomEvent<any>, fields: string[]) => {
     const tempExpense = { ...selectedExpense };
-    fields.forEach((field) => {
+    if (fields.includes("conversionAmount")) {
+      const newConversion =
+        parseFloat(e.target.value) * tempExpense.currencyRate;
+      tempExpense["conversionAmount"] = newConversion;
+      tempExpense["amount"] = parseFloat(e.target.value);
+    } else {
       //@ts-ignore
-      const isFieldNumber = typeof tempExpense[field] === "number";
+      const isFieldNumber = typeof tempExpense[fields[0]] === "number";
       //@ts-ignore
-      tempExpense[field] = isFieldNumber
+      tempExpense[fields[0]] = isFieldNumber
         ? parseFloat(e.target.value)
         : e.target.value;
-    });
+    }
     setSelectedExpense(tempExpense);
   };
 
@@ -203,6 +304,23 @@ export default function ExpenseDrawer({
     exchangeRateData.TargetCurrency,
     exchangeRateData.RateDate,
   ]);
+
+  useEffect(() => {
+    setExchangeRateData({
+      SourceCurrency: expenseCurrency,
+      TargetCurrency: targetCurrency?.id,
+      RateDate: !expenseDate ? new Date() : expenseDate,
+    });
+  }, [expenseCurrency, targetCurrency, expenseDate]);
+
+  useEffect(() => {
+    if (exchangeRateData.SourceCurrency === exchangeRateData.TargetCurrency) {
+      const tempExpense = { ...selectedExpense };
+      tempExpense.currencyRate = 1;
+      tempExpense.conversionAmount = selectedExpense.amount;
+      setSelectedExpense(tempExpense);
+    }
+  }, []);
 
   return (
     <>
@@ -247,6 +365,7 @@ export default function ExpenseDrawer({
                   fullWidth
                   value={String(selectedExpense.amount)}
                   type="number"
+                  showInputError={false}
                   onMaChange={(el) => {
                     handleInputChange(el, ["amount", "conversionAmount"]);
                   }}
@@ -336,6 +455,7 @@ export default function ExpenseDrawer({
                   }
                   onMaDateChange={handleDateChange}
                   required
+                  shouldCloseOnSelect
                 ></MaDateInput>
                 <MaText className="ma-display-flex ma-size-margin-top-8 ma-size-margin-bottom-8">
                   {t("labels.description")}
@@ -369,6 +489,15 @@ export default function ExpenseDrawer({
                   >
                     <span>{t("labels.toBeBilled")}</span>
                   </MaCheckbox>
+                  {selectedExpense.customFields?.length > 0 && (
+                    <div>
+                      {selectedExpense.customFields.map((field, index) => (
+                        <div key={field.id}>
+                          {renderCustomFields(field, index)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </form>
             </MaGridRow>
@@ -394,15 +523,25 @@ export default function ExpenseDrawer({
             )}
           </div>
           {selectedExpense.id ? (
-            <MaButton
-              fillStyle={MasraffFillStyle.Solid}
-              colorType={MasraffColorType.Primary}
-              onMaClick={() => {
-                updateExpenseRecord.mutate(selectedExpense);
-              }}
-            >
-              {t("labels.update")}
-            </MaButton>
+            <div className="ma-display-flex">
+              <MaButton
+                className="ma-display-flex ma-size-margin-right-8"
+                fillStyle={MasraffFillStyle.Solid}
+                colorType={MasraffColorType.Constructive}
+                onMaClick={() => setOpenDivideModal(true)}
+              >
+                {t("labels.divideExpense")}
+              </MaButton>
+              <MaButton
+                fillStyle={MasraffFillStyle.Solid}
+                colorType={MasraffColorType.Primary}
+                onMaClick={() => {
+                  updateExpenseRecord.mutate(selectedExpense);
+                }}
+              >
+                {t("labels.update")}
+              </MaButton>
+            </div>
           ) : (
             <MaButton
               fillStyle={MasraffFillStyle.Solid}
@@ -416,7 +555,7 @@ export default function ExpenseDrawer({
         {isDeleteModalOpen && (
           <MaDialog isOpen={isDeleteModalOpen}>
             <MaDialogContent>
-              <div>{`${selectedExpense.id}'li masrafı silmek istediğinize emin misiniz?`}</div>
+              <div>{`${selectedExpense.id} id'li masrafı silmek istediğinize emin misiniz?`}</div>
             </MaDialogContent>
             <MaDialogFooter>
               <div></div>
@@ -434,6 +573,7 @@ export default function ExpenseDrawer({
                   onMaClick={() => {
                     deleteExpense(selectedExpense.id, delegateUser);
                     setDeleteModalOpen(false);
+                    changeStatus(false);
                   }}
                 >
                   {t("labels.delete")}
@@ -441,6 +581,48 @@ export default function ExpenseDrawer({
               </div>
             </MaDialogFooter>
           </MaDialog>
+        )}
+        {openDivideModal && (
+          <MaDialog isOpen={openDivideModal}>
+            <MaDialogHeader>{t("labels.divideExpense")}</MaDialogHeader>
+            <MaDialogContent>
+              <div style={{ marginTop: "25px", maxWidth: "600px" }}>
+                <DataTable
+                  data={getFormattedExpenseData(dividedExpenseState)}
+                  column={expenseColumnsSimplified}
+                  isInteractive={false}
+                />
+              </div>
+            </MaDialogContent>
+            <MaDialogFooter>
+              <MaButton
+                fillStyle={MasraffFillStyle.Ghost}
+                colorType={MasraffColorType.Neutral}
+                onMaClick={() => setDividerDrawerOpen(true)}
+              >
+                {t("labels.add")}
+              </MaButton>
+              <MaButton
+                fillStyle={MasraffFillStyle.Ghost}
+                colorType={MasraffColorType.Primary}
+                disabled={dividedExpenseState.length === 1}
+                onMaClick={() => {
+                  divideExpense(dividedExpenseState, delegatedUserId);
+                  changeStatus(false);
+                }}
+              >
+                {t("labels.save")}
+              </MaButton>
+            </MaDialogFooter>
+          </MaDialog>
+        )}
+        {isDividerDrawerOpen && (
+          <ExpenseDividerDrawer
+            isOpen={isDividerDrawerOpen}
+            changeStatus={(status) => setDividerDrawerOpen(status)}
+            dividedExpenseState={dividedExpenseState}
+            setDividedExpenseState={setDividedExpenseState}
+          />
         )}
       </MaDrawer>
     </>

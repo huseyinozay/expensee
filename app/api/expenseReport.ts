@@ -91,8 +91,19 @@ export async function updateExpenseReportStatus(expenseReport: ExpenseReport) {
   );
 }
 
-export async function saveExpenseReport(expenseReport: ExpenseReport) {
-  return api.post("v1/reports", expenseReport);
+export async function saveExpenseReport(expenseReport: CreateReport) {
+  return await api.post("v1/reports", expenseReport);
+}
+
+export async function addExpensesToReport(
+  reportId: number,
+  expenseList: Expense[],
+  delegatedUserId: string
+) {
+  return await api.update(
+    `v1/reports/${reportId}/admin/expenses?delegatedUserId=${delegatedUserId}`,
+    expenseList
+  );
 }
 
 export async function getIndividualExpenseReport(

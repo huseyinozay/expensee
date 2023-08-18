@@ -93,3 +93,7 @@ export function deleteExpense(
     `v1/expenses/${expenseId}?delegatedUserId=${delegatedUserId}`
   );
 }
+
+export function divideExpense(dividedExpenses: Expense[],delegatedUserId: number | null){
+  return api.post(`v1/mobile/divideExpense/${dividedExpenses[0].id}?delegatedUserId=${delegatedUserId}`,dividedExpenses)
+}

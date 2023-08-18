@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
 class ApiService {
@@ -18,7 +20,7 @@ class ApiService {
     body?: any,
     params?: any
   ): Promise<T> {
-    const options: RequestInit = {
+    let options: RequestInit = {
       method,
       headers: {
         "Content-Type": "application/json",
@@ -28,18 +30,21 @@ class ApiService {
     const version = url.split("/")[0];
     const isIntegrationVersion = version !== "v1";
     const isVersionv1_5 = version === "v1.5";
+    let refreshToken;
 
     if (isIntegrationVersion) {
       if (isVersionv1_5) this.baseUrl = process.env.NEXT_PUBLIC_BASE_URL_V15;
     } else this.baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     if (typeof window !== "undefined") {
-      if (localStorage.getItem("access_token")) {
+      const token = localStorage.getItem("access_token");
+      refreshToken = localStorage.getItem("refresh_token");
+      if (token) {
         options.headers = {
           ...options.headers,
           Authorization: isIntegrationVersion
             ? "00f784b5ac7a47df8af3400af46377d0"
-            : `Bearer ${localStorage.getItem("access_token")}`,
+            : `Bearer ${token}`,
         };
       }
     }
@@ -56,6 +61,35 @@ class ApiService {
     }
 
     const response = await fetch(this.baseUrl + url, options);
+
+    if (response.status === 401) {
+      const refresh_body = {
+        refresh_token: refreshToken,
+        grant_type: "refresh_token",
+        client_id: "adminApp",
+      };
+      options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      // @ts-ignore
+      options.body = new URLSearchParams(refresh_body);
+      let refreshResponse = await fetch(this.baseUrl + "token", options);
+      refreshResponse = await refreshResponse.json();
+      // @ts-ignore
+      console.log("refreshResponse", refreshResponse.access_token);
+      // @ts-ignore
+      localStorage.setItem("access_token", refreshResponse.access_token);
+      // @ts-ignore
+      localStorage.setItem("refresh_token", refreshResponse.refresh_token);
+      // @ts-ignore
+      Cookies.set("token", refreshResponse.access_token);
+      setTimeout(() => {
+        console.log("refreshed");
+      }, 2000);
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status} ${response}`);

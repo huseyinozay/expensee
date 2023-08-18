@@ -55,11 +55,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   async function login(authData: AuthData) {
     try {
       const response: any = await api.post("token", authData);
-      console.log("post token resppp::", response);
       setUser(response);
       setUserId(response.userId);
       setStatus("loaded");
       localStorage.setItem("access_token", response.access_token);
+      localStorage.setItem("refresh_token", response.refresh_token);
       localStorage.setItem("user", JSON.stringify(response));
       Cookies.set("token", response.access_token);
       setIsAuthenticated(true);
@@ -89,7 +89,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       setToken(localStorage.getItem("access_token"));
     }
     //@ts-ignore
-    console.log("user::", JSON.parse(localStorage.getItem("user")));
   }, []);
 
   return (

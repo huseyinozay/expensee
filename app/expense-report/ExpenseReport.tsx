@@ -220,7 +220,11 @@ export default function ExpenseReport() {
               <MaTabContent tabContentId="report">
                 <div
                   className="ma-display-flex ma-display-flex-column"
-                  style={{ width: "2000px" }}
+                  style={{
+                    padding: "5px",
+                    overflowX: "scroll",
+                    width: "2500px",
+                  }}
                 >
                   <div>
                     <MaButton
@@ -415,23 +419,21 @@ export default function ExpenseReport() {
                   </div>
                   <MaSpacer size={MasraffSpacerSize.M} />
 
-                  {/* page begins here */}
                   {isLoadingReports ? (
                     <Loading />
                   ) : (
                     <>
                       {expenseReportData && expenseReportData.length > 0 ? (
                         <>
-                          <div>
-                            <DataTable
-                              column={expenseReportColumns}
-                              data={expenseReportData}
-                              changeStatus={changeStatus}
-                              changeStatus2={changeDetailStatus}
-                              hasSecondaryInteraction
-                              setRowId={onClickExpenseReportDetail}
-                            />
-                          </div>
+                          <DataTable
+                            column={expenseReportColumns}
+                            data={expenseReportData}
+                            changeStatus={changeStatus}
+                            changeStatus2={changeDetailStatus}
+                            hasSecondaryInteraction
+                            setRowId={onClickExpenseReportDetail}
+                          />
+
                           <div style={{ padding: "10px" }}>
                             {t("labels.page")} {currentPage + 1}/{totalPages}
                             <p style={{ paddingTop: "5px" }}>

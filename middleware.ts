@@ -42,15 +42,13 @@ export async function middleware(request: any) {
   const token = request.cookies.get("token")?.value;
 
   if (token) {
-    const isExpired: boolean = isTokenExpired(token);
-
-    if (isExpired && !isAuthPageRequested) {
-      store.dispatch(logoutUser());
-      return NextResponse.redirect(new URL(`/login`, url));
-    }
-
-    if (isAuthPageRequested && !isExpired)
-      return NextResponse.redirect(new URL(`/expense`, url));
+    //const isExpired: boolean = isTokenExpired(token);
+    // if (isExpired && !isAuthPageRequested) {
+    //   store.dispatch(logoutUser());
+    //   return NextResponse.redirect(new URL(`/login`, url));
+    // }
+    // if (isAuthPageRequested)
+    //   return NextResponse.redirect(new URL(`/expense`, url));
   }
 
   if (!token && !isAuthPageRequested) {

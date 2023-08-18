@@ -1,4 +1,4 @@
-.header-main {
+.header {
   z-index: 4;
   height: 50px;
   position: fixed;
@@ -7,15 +7,16 @@
 }
 
 .mainColumn {
-  float: right;
-  flex: 11;
+  margin-left: auto;
+  width: calc(100vw - 190px);
   overflow-y: scroll;
   height: 100vh;
 }
 
 .sidebarColumn {
-  float: left;
-  flex: 1;
+  position: fixed;
+  width: 185px;
+  margin-right: auto;
   background-color: #6a60a9;
   height: 100vh;
 }

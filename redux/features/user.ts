@@ -35,10 +35,8 @@ export const loginAsync = createAsyncThunk(
   async (authData: AuthData, { rejectWithValue }) => {
     try {
       const response: any = await api.post("token", authData);
-      console.log("post token resppp::", response);
       return response;
     } catch (err: any) {
-      console.log("err::", err);
       return rejectWithValue(err.response);
     }
   }
@@ -63,7 +61,6 @@ export const authSlice = createSlice({
       state.token = action.payload.access_token;
       if (state.token) state.isAuthenticated = true;
       localStorage.setItem("access_token", action.payload.access_token);
-      console.log("user bilgisine bakalim", action.payload);
       Cookies.set("token", action.payload.access_token);
       localStorage.setItem("user", JSON.stringify(action.payload));
     });

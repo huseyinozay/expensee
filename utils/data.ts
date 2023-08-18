@@ -1,4 +1,6 @@
-import { expenseStatus, paymentMethods } from "./utils";
+import { expenseStatus, formStatus, paymentMethods } from "./utils";
+
+const imageRawBaseUrl = "https://masraffphoto.blob.core.windows.net/";
 
 type Column = {
   field: string;
@@ -12,6 +14,14 @@ export const expenseColumns: Array<Column> = [
     title: "labels.expenseNo",
   },
   {
+    field: "guid",
+    title: "labels.receipt",
+    formatter: (val) =>
+      val
+        ? `<Image src="${imageRawBaseUrl}thumbnails/${val}.jpg" alt="" width="50" height="50">`
+        : null,
+  },
+  {
     field: "user",
     title: "labels.user",
     formatter: (val) => `${val.firstName} ${val.lastName}`,
@@ -21,7 +31,7 @@ export const expenseColumns: Array<Column> = [
     title: "labels.merchant",
   },
   {
-    field: "amount",
+    field: "combinedAmount",
     title: "labels.amount",
   },
   {
@@ -51,6 +61,22 @@ export const expenseColumns: Array<Column> = [
     title: "labels.uploadDate",
     //@ts-ignore
     formatter: (val) => new Date(val).toLocaleDateString("tr-TR"),
+  },
+];
+
+export const expenseColumnsSimplified: Array<Column> = [
+  {
+    field: "expenseTypeId",
+    title: "labels.category",
+  },
+  {
+    field: "taxPercentage",
+    title: "labels.taxPercentage",
+    formatter: (val) => `%${val}`,
+  },
+  {
+    field: "combinedAmount",
+    title: "labels.amount",
   },
 ];
 
@@ -192,5 +218,48 @@ export const waitingApprovalReportColumns: Array<Column> = [
   {
     field: "isDelivered",
     title: "labels.deliveryStatus",
+  },
+];
+
+export const customFormColumns: Array<Column> = [
+  {
+    field: "id",
+    title: "labels.reportNo",
+  },
+  {
+    field: "subCompanyName",
+    title: "labels.organization",
+  },
+  {
+    field: "name",
+    title: "labels.name",
+  },
+  {
+    field: "customReportType",
+    title: "labels.reportType",
+  },
+  {
+    field: "status",
+    title: "labels.status",
+    //@ts-ignore
+    formatter: (val) => formStatus[val],
+  },
+  {
+    field: "userEmail",
+    title: "labels.expenseOwner",
+  },
+  {
+    field: "sendDate",
+    title: "labels.sendingDate",
+    formatter: (val) => new Date(val).toLocaleDateString("tr-TR"),
+  },
+  {
+    field: "approverFullName",
+    title: "labels.approvingFormBy",
+  },
+  {
+    field: "approvedDate",
+    title: "labels.approvedDate",
+    formatter: (val) => new Date(val).toLocaleDateString("tr-TR"),
   },
 ];

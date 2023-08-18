@@ -27,6 +27,21 @@ export const expenseStatus = {
   15: i18n.t("labels.uploadError"),
 };
 
+export const formStatus = {
+  0: i18n.t("labels.processing"),
+  1: i18n.t("labels.ready"),
+  2: i18n.t("labels.waiting"),
+  3: i18n.t("labels.approved"),
+  4: i18n.t("labels.rejected"),
+  5: i18n.t("labels.archived"),
+  6: i18n.t("labels.deleted"),
+  7: i18n.t("labels.completed"),
+  8: i18n.t("labels.waitingForPayment"),
+  9: i18n.t("labels.errorInPayment"),
+  10: i18n.t("labels.paymentCompleted"),
+  12: i18n.t("labels.sentForApproval"),
+};
+
 export const paymentMethods = {
   0: i18n.t("labels.personalCreditCard"),
   1: i18n.t("labels.enterpriseCreditCard"),
@@ -122,6 +137,7 @@ export const taxPertangeList = [
   { id: 0, name: "0" },
   { id: 1, name: "1" },
   { id: 8, name: "8" },
+  { id: 10, name: "10" },
   { id: 18, name: "18" },
   { id: 20, name: "20" },
 ];
@@ -397,4 +413,11 @@ export const emptyExpenseReport: ExpenseReport = {
   workflows: [],
   note: "",
   delegatedUserId: null,
+};
+
+export const emptyCreateReport: CreateReport = {
+  name: "",
+  delegatedUserId: null,
+  subCompanyId: null,
+  user: {},
 };
