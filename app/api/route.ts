@@ -79,16 +79,20 @@ class ApiService {
       let refreshResponse = await fetch(this.baseUrl + "token", options);
       refreshResponse = await refreshResponse.json();
       // @ts-ignore
-      console.log("refreshResponse", refreshResponse.access_token);
+      if (refreshResponse.access_token !== undefined) {
+        // @ts-ignore
+        localStorage.setItem("access_token", refreshResponse.access_token);
+      }
       // @ts-ignore
-      localStorage.setItem("access_token", refreshResponse.access_token);
+      if (refreshResponse.refresh_token !== undefined) {
+        // @ts-ignore
+        localStorage.setItem("refresh_token", refreshResponse.refresh_token);
+      }
       // @ts-ignore
-      localStorage.setItem("refresh_token", refreshResponse.refresh_token);
-      // @ts-ignore
-      Cookies.set("token", refreshResponse.access_token);
-      setTimeout(() => {
-        console.log("refreshed");
-      }, 2000);
+      if (refreshResponse.access_token !== undefined) {
+        // @ts-ignore
+        Cookies.set("token", refreshResponse.access_token);
+      }
     }
 
     if (!response.ok) {
