@@ -14,6 +14,21 @@ class ApiService {
     this.token = token;
   }
 
+  public isTokenExpired(token: string) {
+    const tokenData: any = JSON.parse(
+      Buffer.from(token.split(".")[1], "base64").toString()
+    );
+
+    let result: boolean;
+
+    if (tokenData.exp * 1000 < Date.now()) {
+      result = true;
+    } else {
+      result = false;
+    }
+    return result;
+  }
+
   private async request<T>(
     url: string,
     method: Method,
@@ -37,8 +52,42 @@ class ApiService {
     } else this.baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
+      let token = localStorage.getItem("access_token");
       refreshToken = localStorage.getItem("refresh_token");
+      if (token && this.isTokenExpired(token)) {
+        const refresh_body = {
+          refresh_token: refreshToken,
+          grant_type: "refresh_token",
+          client_id: "adminApp",
+        };
+        options = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+        // @ts-ignore
+        options.body = new URLSearchParams(refresh_body);
+        let refreshResponse = await fetch(this.baseUrl + "token", options);
+        refreshResponse = await refreshResponse.json();
+        // @ts-ignore
+        if (refreshResponse.access_token !== undefined) {
+          // @ts-ignore
+          localStorage.setItem("access_token", refreshResponse.access_token);
+          // @ts-ignore
+          token = refreshResponse.access_token;
+        }
+        // @ts-ignore
+        if (refreshResponse.refresh_token !== undefined) {
+          // @ts-ignore
+          localStorage.setItem("refresh_token", refreshResponse.refresh_token);
+        }
+        // @ts-ignore
+        if (refreshResponse.access_token !== undefined) {
+          // @ts-ignore
+          Cookies.set("token", refreshResponse.access_token);
+        }
+      }
       if (token) {
         options.headers = {
           ...options.headers,
@@ -61,39 +110,6 @@ class ApiService {
     }
 
     const response = await fetch(this.baseUrl + url, options);
-
-    if (response.status === 401) {
-      const refresh_body = {
-        refresh_token: refreshToken,
-        grant_type: "refresh_token",
-        client_id: "adminApp",
-      };
-      options = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      // @ts-ignore
-      options.body = new URLSearchParams(refresh_body);
-      let refreshResponse = await fetch(this.baseUrl + "token", options);
-      refreshResponse = await refreshResponse.json();
-      // @ts-ignore
-      if (refreshResponse.access_token !== undefined) {
-        // @ts-ignore
-        localStorage.setItem("access_token", refreshResponse.access_token);
-      }
-      // @ts-ignore
-      if (refreshResponse.refresh_token !== undefined) {
-        // @ts-ignore
-        localStorage.setItem("refresh_token", refreshResponse.refresh_token);
-      }
-      // @ts-ignore
-      if (refreshResponse.access_token !== undefined) {
-        // @ts-ignore
-        Cookies.set("token", refreshResponse.access_token);
-      }
-    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status} ${response}`);
