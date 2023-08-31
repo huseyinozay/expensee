@@ -10,7 +10,7 @@ body,
   overflow: hidden;
 }
 
-div.ma-display-table-cell-content {
+.ma-display-table-cell-content {
   width: initial !important;
 }
 
@@ -145,4 +145,14 @@ div.ma-display-table-cell-content {
     -webkit-transform: rotateY(-180deg);
     transform: rotateY(-180deg);
   }
+}
+
+.data-table-formatter {
+  word-break: normal;
+  overflow-wrap: break-word;
+  min-width: 130px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 50px;
 }

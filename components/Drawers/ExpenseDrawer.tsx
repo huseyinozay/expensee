@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useUserState } from "@/context/user";
@@ -8,6 +8,7 @@ import {
   changeExchangeRate,
   deleteExpense,
   divideExpense,
+  fetchCustomFieldData,
   getExpenseCategoryData,
   getUserOhpCodeDataList,
   saveExpense,
@@ -42,6 +43,7 @@ import {
   filterObjectsByIdAndName,
   filterObjectsByIdAndValue,
   getFormattedExpenseData,
+  getSelectedItemName,
 } from "@/utils/helpers";
 import {
   availablePaymentMethods,
@@ -50,6 +52,8 @@ import {
   taxPertangeList,
 } from "@/utils/utils";
 import { expenseColumnsSimplified } from "@/utils/data";
+import { CustomFields } from "../CustomFields";
+import { BlobImage } from "../BlobImage";
 
 interface DrawerExpenseProps {
   isOpen: boolean;
@@ -74,6 +78,7 @@ export default function ExpenseDrawer({
     delegatedUserId && delegatedUserId !== "None"
       ? parseInt(delegatedUserId)
       : null;
+
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [openDivideModal, setOpenDivideModal] = useState(false);
   const [isDividerDrawerOpen, setDividerDrawerOpen] = useState(false);
@@ -91,11 +96,16 @@ export default function ExpenseDrawer({
       ? new Date()
       : selectedExpense.expenseDate,
   });
+
+  const hasSetCustomFields = useRef(false);
+
   const {
     currencyRate,
     conversionAmount,
     currency: expenseCurrency,
     expenseDate,
+    customFields: initialCustomFields,
+    guid,
   } = selectedExpense;
 
   const { data: ohpCodeQuery } = useQuery<OhpCodeData[]>({
@@ -119,102 +129,12 @@ export default function ExpenseDrawer({
   if (expenseCategoryData)
     expenseCategories = filterObjectsByIdAndName(expenseCategoryData);
 
-  /* const { data: customFieldsData } = useQuery<MasraffResponse>({
+  const { data: customFieldsData, isFetching } = useQuery<MasraffResponse>({
     queryKey: ["customFields"],
     queryFn: async () => fetchCustomFieldData(),
-  }); */
+  });
 
-  const handleCustomFieldsChange = (
-    event: any,
-    index: number,
-    type: string = "not date"
-  ) => {
-    const tempExpense = { ...selectedExpense };
-    if (type === "date") {
-      if (
-        JSON.stringify(event.target.value) ===
-        JSON.stringify(
-          new Date(selectedExpense.customFields[index].customValue)
-        )
-      )
-        return;
-      if (typeof event.target.value === "object") {
-        let rawDate = event.target.value.toString();
-        rawDate = new Date(event.target.value);
-        const date = rawDate.toISOString();
-        tempExpense.customFields[index].customValue = date;
-      }
-    } else {
-      tempExpense.customFields[index].customValue = event.target.value;
-    }
-    setSelectedExpense(tempExpense);
-  };
-
-  const renderCustomFields = (field: any, index: number) => {
-    const textOfCustomField = (
-      <MaText className="ma-display-flex ma-size-margin-bottom-8 ma-size-margin-top-8">
-        {field.fieldName}
-      </MaText>
-    );
-    let inputElement;
-    switch (field.valueType) {
-      case 0:
-        inputElement = (
-          <MaInput
-            fullWidth
-            onMaInput={(e) => handleCustomFieldsChange(e, index)}
-            value={field.customValue ? String(field.customValue) : ""}
-          />
-        );
-        break;
-      case 1:
-        inputElement = (
-          <MaInput
-            fullWidth
-            value={field.customValue ? String(field.customValue) : ""}
-            type="number"
-            showInputError={false}
-            onMaInput={(e) => handleCustomFieldsChange(e, index)}
-          ></MaInput>
-        );
-        break;
-      case 3:
-        inputElement = (
-          <div style={{ color: "Red" }}>
-            {/* <MaDateInput
-              fullWidth
-              max={new Date()}
-              value={
-                !field.customValue ? undefined : new Date(field.customValue)
-              }
-              onMaDateChange={(e) => handleCustomFieldsChange(e, index, "date")}
-              shouldCloseOnSelect
-            /> */}
-            After solving blocksfabrikk bug, date input will come here
-          </div>
-        );
-        break;
-      case 4:
-        inputElement = (
-          <Dropdown
-            input={handleChange}
-            placeholder={
-              field.customValue ? String(field.customValue) : t("labels.select")
-            }
-            selectData={filterObjectsByIdAndValue(field.customFieldValues)}
-            valueName="customField"
-          />
-        );
-        break;
-    }
-
-    return (
-      <div>
-        {textOfCustomField}
-        {inputElement}
-      </div>
-    );
-  };
+  const [customFields, setCustomFields] = useState<any[]>([]);
 
   const mutateExchangeRate = useMutation(changeExchangeRate, {
     onSuccess: (data: number) => {
@@ -244,6 +164,7 @@ export default function ExpenseDrawer({
   };
 
   const handleChange = (data: DropdownSelection) => {
+    console.log("dropdowna gelen data::", data);
     const tempExpense = { ...selectedExpense };
     if (data.name === "expenseTypeId") {
       const changedCategory = expenseCategoryData?.find(
@@ -312,6 +233,31 @@ export default function ExpenseDrawer({
       RateDate: !expenseDate ? new Date() : expenseDate,
     });
   }, [expenseCurrency, targetCurrency, expenseDate]);
+
+  useEffect(() => {
+    if (!isFetching && !hasSetCustomFields.current) {
+      if (
+        isAddExpenseView &&
+        customFieldsData &&
+        customFieldsData.results.length > 0
+      ) {
+        setCustomFields(customFieldsData.results);
+        hasSetCustomFields.current = true;
+      } else {
+        setCustomFields(JSON.parse(JSON.stringify(initialCustomFields)));
+        hasSetCustomFields.current = true;
+      }
+    }
+  }, [customFieldsData]);
+
+  useEffect(() => {
+    if (hasSetCustomFields.current) {
+      setSelectedExpense((prevState) => ({
+        ...prevState,
+        customFields: customFields,
+      }));
+    }
+  }, [customFields]);
 
   useEffect(() => {
     if (exchangeRateData.SourceCurrency === exchangeRateData.TargetCurrency) {
@@ -436,7 +382,10 @@ export default function ExpenseDrawer({
                   input={handleChange}
                   placeholder={
                     selectedExpense.paymentMethod
-                      ? String(selectedExpense.paymentMethod)
+                      ? getSelectedItemName(
+                          selectedExpense.paymentMethod,
+                          availablePaymentMethods
+                        )
                       : t("labels.select")
                   }
                   selectData={availablePaymentMethods}
@@ -489,16 +438,25 @@ export default function ExpenseDrawer({
                   >
                     <span>{t("labels.toBeBilled")}</span>
                   </MaCheckbox>
-                  {selectedExpense.customFields?.length > 0 && (
+                  {customFields && customFields.length > 0 && (
                     <div>
-                      {selectedExpense.customFields.map((field, index) => (
-                        <div key={field.id}>
-                          {renderCustomFields(field, index)}
+                      {customFields.map((field, index) => (
+                        <div
+                          style={{ paddingTop: "8px", paddingBottom: "8px" }}
+                          key={field.id}
+                        >
+                          <CustomFields
+                            field={field}
+                            index={index}
+                            data={customFields}
+                            setData={(value) => setCustomFields(value)}
+                          />
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
+                <BlobImage file={`${guid}.jpg`} />
               </form>
             </MaGridRow>
           </MaGrid>

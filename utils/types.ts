@@ -15,7 +15,7 @@ interface ExpenseData extends MasraffResponse {
   allExpenseIds: Array<number>;
 }
 
-interface CustomExpenseFormData extends MasraffResponse {
+interface CustomReportFormsData extends MasraffResponse {
   enableReportIdsForExport: number[];
 }
 
@@ -25,6 +25,82 @@ interface CustomFormType {
   name: string;
   createDate: Date;
   status: number;
+}
+
+interface FormCustomFields {
+  id: number;
+  companyId: number;
+  subCompanyId: number;
+  fieldName: string;
+  valueType: number;
+  fieldType: number;
+  customReportId: number;
+  isRequired: boolean;
+  createDate: string;
+  status: number;
+  customValue: string | null;
+  customFieldValues: any[];
+}
+
+interface CustomReport {
+  id: number;
+  userId: number;
+  approverUserId: number;
+  name: string;
+  logoExported: boolean;
+  totalAmount: number;
+  comment: string;
+  currency: number;
+  currencyText: string;
+  status: number;
+  statusText: string;
+  sendDate: string;
+  createDate: string;
+  user: Object;
+  approver: Object;
+  expenses: Object;
+  workflows: any[];
+  hasRecurring: boolean;
+  totalConfirmation: number;
+  subCompanyId: number;
+  updateDate: string;
+  approvedDate: string;
+  subCompanyName: string;
+  reportType: number;
+  formType: {
+    id: number;
+    companyId: number;
+    name: string;
+    createDate: string;
+    status: number;
+  };
+  customFields: FormCustomFields[];
+  customReportType: null; // Modify when needed.
+  hasBudget: boolean;
+  integratedWorkflowResult: null; // Modify when needed.
+  integratedWorkflowStatusCode: number;
+  vehicle: null; // Modify when needed.
+  origin: null; // Modify when needed.
+  destination: null; // Modify when needed.
+  startDate: null; // Modify when needed.
+  endDate: null; // Modify when needed.
+  tripReportId: null; // Modify when needed.
+  description: null; // Modify when needed.
+  ohpCodeId: null; // Modify when needed.
+  isItAbroad: boolean;
+  tripReport: null; // Modify when needed.
+  advanceReport: null; // Modify when needed.
+  denialNote: null; // Modify when needed.
+  advanceReportId: null; // Modify when needed.
+  tag_LookupId: null; // Modify when needed.
+  tag_Lookup: Object;
+  isDelivered: boolean;
+  isExcludeFromBatchExports: boolean;
+}
+
+interface CustomReportForm {
+  userBySubCompyList: any[];
+  report: CustomReport;
 }
 
 interface TagData extends MasraffResponse {
@@ -96,6 +172,7 @@ type Expense = {
   attendeesList: Array<string>;
   attendeesNumber: number;
   expenseType: { name: string };
+  guid: string;
 };
 
 interface ExpenseReport {
@@ -166,4 +243,10 @@ type ExchangeRate = {
 interface SelectionData {
   name: string;
   value: number | undefined;
+}
+
+interface UserEmailData {
+  id: number;
+  userName: string;
+  fullName: string;
 }

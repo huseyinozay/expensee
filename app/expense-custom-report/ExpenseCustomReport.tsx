@@ -1,7 +1,13 @@
 "use client";
 
+import React, { useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import {
+  getCustomReportTypes,
+  getCustomReportsView,
+} from "../api/expenseCustomReport";
 import Dropdown from "@/components/Dropdown";
-import { statusList } from "@/utils/utils";
 import {
   MasraffColorType,
   MasraffSpacerSize,
@@ -15,17 +21,12 @@ import {
   MaSeparator,
   MaSpacer,
 } from "@fabrikant-masraff/masraff-react";
-import React, { use, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import {
-  getCustomReportTypes,
-  getCustomReportsView,
-} from "../api/expenseCustomReport";
-import { filterObjectsByIdAndName } from "@/utils/helpers";
-import { useQuery } from "@tanstack/react-query";
-import { Loading } from "@/components/Loading/Loading";
-import { customFormColumns, expenseColumns } from "@/utils/data";
+import CustomReportDrawer from "@/components/Drawers/CustomReportDrawer";
 import DataTable from "@/components/DataTable";
+import { Loading } from "@/components/Loading/Loading";
+import { filterObjectsByIdAndName } from "@/utils/helpers";
+import { customFormColumns } from "@/utils/data";
+import { statusList } from "@/utils/utils";
 
 const ExpenseCustomReport = () => {
   const { t } = useTranslation();
@@ -68,7 +69,7 @@ const ExpenseCustomReport = () => {
     data: customForms,
     isLoading: isLoadingCustomForms,
     refetch,
-  } = useQuery<CustomExpenseFormData>({
+  } = useQuery<CustomReportFormsData>({
     queryKey: ["customReports", filter],
     queryFn: async () => getCustomReportsView(filter),
   });
@@ -277,6 +278,14 @@ const ExpenseCustomReport = () => {
             </MaButton>
           </div>
         </>
+      )}
+
+      {isDrawerOpened && (
+        <CustomReportDrawer
+          isOpen={isDrawerOpened}
+          data={selectedForm}
+          changeStatus={changeStatus}
+        />
       )}
     </div>
   );

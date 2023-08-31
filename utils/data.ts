@@ -1,6 +1,9 @@
-import { expenseStatus, formStatus, paymentMethods } from "./utils";
-
-const imageRawBaseUrl = "https://masraffphoto.blob.core.windows.net/";
+import {
+  expenseStatus,
+  formStatus,
+  imageRawBaseUrl,
+  paymentMethods,
+} from "./utils";
 
 type Column = {
   field: string;
@@ -16,10 +19,7 @@ export const expenseColumns: Array<Column> = [
   {
     field: "guid",
     title: "labels.receipt",
-    formatter: (val) =>
-      val
-        ? `<Image src="${imageRawBaseUrl}thumbnails/${val}.jpg" alt="" width="50" height="50">`
-        : null,
+    formatter: (val) => val ? `BLOBIMAGE_${val}` : null,
   },
   {
     field: "user",

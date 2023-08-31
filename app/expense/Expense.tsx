@@ -37,12 +37,7 @@ import {
 } from "@/utils/utils";
 import "../globals.css";
 
-import Image from "next/image";
 
-type InputData = {
-  name: string;
-  value: number | undefined;
-};
 
 export default function Expense() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -296,7 +291,7 @@ export default function Expense() {
           {expenseData && (
             <DataTable
               column={expenseColumns}
-              data={getFormattedExpenseData(expenseData?.results)}
+              data={getFormattedExpenseData(expenseData?.results,expenseCategories)}
               changeStatus={changeStatus}
               setRowId={onClickExpenseDetail}
             />

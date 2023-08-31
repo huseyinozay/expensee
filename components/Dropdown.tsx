@@ -24,6 +24,8 @@ type DropDownProps = {
   valueName: string;
   reset?: boolean;
   disabled?: boolean;
+  selectionType?: MasraffSelectionType;
+  isSelectValueByName?: boolean;
 };
 
 export default function Dropdown({
@@ -32,7 +34,9 @@ export default function Dropdown({
   input,
   valueName,
   reset,
-  disabled =false,
+  disabled = false,
+  isSelectValueByName = false,
+  selectionType = MasraffSelectionType.Single,
 }: DropDownProps) {
   const rowBlock =
     "ma-display-flex ma-display-flex-row ma-display-flex-align-items-center";
@@ -46,7 +50,7 @@ export default function Dropdown({
     result.value = e.target.value;
     input(result);
   };
-  
+
   const clearSelection = () => {
     selectRef.current?.clearSelection();
   };
@@ -57,7 +61,7 @@ export default function Dropdown({
 
   return (
     <MaSelect
-      selectionType={MasraffSelectionType.Single}
+      selectionType={selectionType}
       fullWidth={true}
       onMaItemSelect={(e) => {
         handleChange(e);
@@ -75,17 +79,18 @@ export default function Dropdown({
       </MaTagInput>
       <MaPopover>
         <MaList>
-          {selectData && selectData.map((value) => {
-            return (
-              <MaListItem
-                key={`key-${value.id}`}
-                value={value.id}
-                label={value.name}
-              >
-                <span className={`${rowBlock}`}>{value.name}</span>
-              </MaListItem>
-            );
-          })}
+          {selectData &&
+            selectData.map((value) => {
+              return (
+                <MaListItem
+                  key={`key-${value.id}`}
+                  value={isSelectValueByName ? value.name : value.id}
+                  label={value.name}
+                >
+                  <span className={`${rowBlock}`}>{value.name}</span>
+                </MaListItem>
+              );
+            })}
         </MaList>
       </MaPopover>
     </MaSelect>

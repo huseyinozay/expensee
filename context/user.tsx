@@ -30,6 +30,8 @@ const initialState: AuthState = {
 type UserState = {
   user: any;
   userId: string;
+  companyId: string;
+  sasToken: string | undefined;
   token: string | undefined;
   status: string;
   logoutUser: () => void;
@@ -43,8 +45,10 @@ const UserStateContext = createContext<UserState>();
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState("loading");
   const [token, setToken] = useState();
+  const [sasToken, setSasToken] = useState();
   const [user, setUser] = useState();
   const [userId, setUserId] = useState<string>("");
+  const [companyId, setCompanyId] = useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const logoutUser = () => {
@@ -57,6 +61,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const response: any = await api.post("token", authData);
       setUser(response);
       setUserId(response.userId);
+      setCompanyId(response.companyId);
       setStatus("loaded");
       localStorage.setItem("access_token", response.access_token);
       localStorage.setItem("refresh_token", response.refresh_token);
@@ -72,7 +77,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const state = {
     user,
     userId,
+    companyId,
     token,
+    sasToken,
     status,
     isAuthenticated,
     logoutUser,
@@ -85,6 +92,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       setUser(JSON.parse(localStorage.getItem("user")));
       //@ts-ignore
       setUserId(JSON.parse(localStorage.getItem("user"))?.userId);
+      //@ts-ignore
+      setCompanyId(JSON.parse(localStorage.getItem("user"))?.companyId);
+      //@ts-ignore
+      setSasToken(JSON.parse(localStorage.getItem("user"))?.sasToken);
       //@ts-ignore
       setToken(localStorage.getItem("access_token"));
     }

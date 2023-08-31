@@ -97,3 +97,8 @@ export function deleteExpense(
 export function divideExpense(dividedExpenses: Expense[],delegatedUserId: number | null){
   return api.post(`v1/mobile/divideExpense/${dividedExpenses[0].id}?delegatedUserId=${delegatedUserId}`,dividedExpenses)
 }
+
+export function getUserEmails() : Promise<UserEmailData[]> {
+  return api.get('v1/users/userEmails')
+
+}

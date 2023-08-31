@@ -5,6 +5,8 @@ const AUTH_PAGES = ["/login", "/register"];
 export const isAuthPages = (url: string) =>
   AUTH_PAGES.some((page) => page.startsWith(url));
 
+export const imageRawBaseUrl = "https://masraffphoto.blob.core.windows.net/";
+
 const userString =
   typeof localStorage !== "undefined" && localStorage.getItem("user");
 export const globalUserObject = userString && JSON.parse(userString);
@@ -420,4 +422,76 @@ export const emptyCreateReport: CreateReport = {
   delegatedUserId: null,
   subCompanyId: null,
   user: {},
+};
+
+export const emptyCustomReportForm: CustomReportForm = {
+  userBySubCompyList: {},
+  report: {
+    id: 0,
+    userId: 0,
+    approverUserId: 0,
+    name: "",
+    logoExported: false,
+    totalAmount: 0,
+    comment: "",
+    currency: 0,
+    currencyText: "",
+    status: 0,
+    statusText: "",
+    sendDate: "",
+    createDate: "",
+    user: {},
+    approver: {},
+    expenses: {},
+    workflows: [],
+    hasRecurring: false,
+    totalConfirmation: 0,
+    subCompanyId: 0,
+    updateDate: "",
+    approvedDate: "",
+    subCompanyName: "",
+    reportType: 0,
+    formType: {
+      id: 0,
+      companyId: 0,
+      name: "",
+      createDate: "",
+      status: 0,
+    },
+    customFields: {
+      id: 0,
+      companyId: 0,
+      subCompanyId: 0,
+      fieldName: "",
+      valueType: 0,
+      fieldType: 0,
+      customReportId: 0,
+      isRequired: false,
+      createDate: "",
+      status: 0,
+      customValue: null,
+      customFieldValues: [],
+    },
+    customReportType: null,
+    hasBudget: false,
+    integratedWorkflowResult: null,
+    integratedWorkflowStatusCode: 0,
+    vehicle: null,
+    origin: null,
+    destination: null,
+    startDate: null,
+    endDate: null,
+    tripReportId: null,
+    description: null,
+    ohpCodeId: null,
+    isItAbroad: false,
+    tripReport: null,
+    advanceReport: null,
+    denialNote: null,
+    advanceReportId: null,
+    tag_LookupId: null,
+    tag_Lookup: {},
+    isDelivered: false,
+    isExcludeFromBatchExports: false,
+  },
 };

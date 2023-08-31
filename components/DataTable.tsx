@@ -1,5 +1,7 @@
 /* eslint-disable react/jsx-key */
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { BlobImage } from "./BlobImage";
 import { MasraffSize, MasraffIconNames } from "@fabrikant-masraff/masraff-core";
 import {
   MaDisplayTable,
@@ -11,7 +13,6 @@ import {
   MaCheckbox,
 } from "@fabrikant-masraff/masraff-react";
 import "../app/globals.css";
-import Image from "next/image";
 
 type Column = {
   field: string;
@@ -44,9 +45,17 @@ function processAndOrderDataByFieldTitlePairs(
 
     for (let pair of fieldTitlePairs) {
       if (pair.field in dataItem) {
-        processedData[pair.field] = pair.formatter
+        let value = pair.formatter
           ? pair.formatter(dataItem[pair.field])
           : dataItem[pair.field];
+
+        if (typeof value === "string" && value.startsWith("BLOBIMAGE_")) {
+          const fileId = value.replace("BLOBIMAGE_", "");
+          console.log('fileId::',fileId)
+          value = <BlobImage isThumbnail file={`${fileId}.jpg`} />;
+        }
+
+        processedData[pair.field] = value;
       }
     }
 
@@ -72,33 +81,43 @@ export default function DataTable({
   );
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const elements = document.getElementsByClassName("table-cell");
+
+    if (elements) {
+      for (var i = 0; i < elements.length; i++) {
+        const shadowRoot = elements[i].shadowRoot;
+        const style = document.createElement("style");
+        style.innerHTML = `.ma-display-table-cell-content { width: initial !important}`;
+        if (shadowRoot) shadowRoot.appendChild(style);
+      }
+    }
+  }, []);
+
+  function renderCellValue(value: any) {
+    if (React.isValidElement(value)) {
+      return value;  
+    }
+    return <div dangerouslySetInnerHTML={{ __html: value }} />;
+  }
+
   return (
     <MaDisplayTable size={MasraffSize.Normal}>
       <MaDisplayTableBody>
         <MaDisplayTableRow sticky={true} header={true}>
           <MaDisplayTableCell
-            style={{
-              wordBreak: "normal",
-              overflowWrap: "break-word",
-              minWidth: "130px",
-              justifyContent: "center",
-              alignItems: "center",
-              textAlign: "center",
-              height: "50px",
-            }}
+            class="table-cell"
+            className="data-table-formatter"
             columnId="actions"
           ></MaDisplayTableCell>
           {column.map((hv) => {
             return (
               <MaDisplayTableCell
+                class="table-cell"
+                className="data-table-formatter"
                 style={{
-                  wordBreak: "normal",
-                  overflowWrap: "break-word",
                   minWidth: "100px",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center",
-                  height: "50px",
                 }}
                 key={hv.field}
                 columnId={hv.field}
@@ -114,15 +133,8 @@ export default function DataTable({
             return (
               <MaDisplayTableRow key={row?.id}>
                 <MaDisplayTableCell
-                  style={{
-                    wordBreak: "normal",
-                    overflowWrap: "break-word",
-                    minWidth: "130px",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    textAlign: "center",
-                    height: "45px",
-                  }}
+                  class="table-cell"
+                  className="data-table-formatter"
                   key={row?.id}
                   columnId="actions"
                 >
@@ -178,20 +190,13 @@ export default function DataTable({
                   .map((en) => {
                     return (
                       <MaDisplayTableCell
-                        style={{
-                          wordBreak: "normal",
-                          overflowWrap: "break-word",
-                          minWidth: "130px",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          textAlign: "center",
-                          height: "45px",
-                        }}
+                        class="table-cell"
+                        className="data-table-formatter"
                         key={en[0]}
                         columnId={en[0]}
                       >
                         {/* @ts-ignore */}
-                        <div dangerouslySetInnerHTML={{ __html: en[1] }} />
+                        {renderCellValue(en[1])}
                       </MaDisplayTableCell>
                     );
                   })}
