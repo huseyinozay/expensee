@@ -425,7 +425,7 @@ export const emptyCreateReport: CreateReport = {
 };
 
 export const emptyCustomReportForm: CustomReportForm = {
-  userBySubCompyList: {},
+  userBySubCompyList:[],
   report: {
     id: 0,
     userId: 0,
@@ -458,7 +458,7 @@ export const emptyCustomReportForm: CustomReportForm = {
       createDate: "",
       status: 0,
     },
-    customFields: {
+    customFields: [{
       id: 0,
       companyId: 0,
       subCompanyId: 0,
@@ -471,7 +471,7 @@ export const emptyCustomReportForm: CustomReportForm = {
       status: 0,
       customValue: null,
       customFieldValues: [],
-    },
+    }],
     customReportType: null,
     hasBudget: false,
     integratedWorkflowResult: null,
