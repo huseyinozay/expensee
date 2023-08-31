@@ -97,6 +97,7 @@ export default function ExpenseDrawer({
       : selectedExpense.expenseDate,
   });
 
+  const processedDefaultRef = useRef(false);
   const hasSetCustomFields = useRef(false);
 
   const {
@@ -112,7 +113,6 @@ export default function ExpenseDrawer({
     queryKey: ["ohpCode"],
     queryFn: async () => getUserOhpCodeDataList(false, userId),
   });
-
   let ohpCodeData: GenericObject[] = [];
   if (ohpCodeQuery) {
     let ohpCodeQueryTransformed = ohpCodeQuery.map((obj) => ({
@@ -121,6 +121,7 @@ export default function ExpenseDrawer({
     }));
     ohpCodeData = filterObjectsByIdAndName(ohpCodeQueryTransformed);
   }
+
   const { data: expenseCategoryData } = useQuery<any[]>({
     queryKey: ["categories"],
     queryFn: async () => getExpenseCategoryData(),
@@ -129,7 +130,7 @@ export default function ExpenseDrawer({
   if (expenseCategoryData)
     expenseCategories = filterObjectsByIdAndName(expenseCategoryData);
 
-  const { data: customFieldsData, isFetching } = useQuery<MasraffResponse>({
+  const { data: customFieldsData, status } = useQuery<MasraffResponse>({
     queryKey: ["customFields"],
     queryFn: async () => fetchCustomFieldData(),
   });
@@ -164,7 +165,6 @@ export default function ExpenseDrawer({
   };
 
   const handleChange = (data: DropdownSelection) => {
-    console.log("dropdowna gelen data::", data);
     const tempExpense = { ...selectedExpense };
     if (data.name === "expenseTypeId") {
       const changedCategory = expenseCategoryData?.find(
@@ -174,7 +174,8 @@ export default function ExpenseDrawer({
       tempExpense.expenseTypeId = changedCategory.id;
     }
     if (data.name === "taxPercentage") {
-      tempExpense.taxAmount = (tempExpense.amount * data.value) / 100;
+      tempExpense.taxAmount =
+        (tempExpense.amount * data.value) / (100 + data.value);
     }
 
     //@ts-ignore
@@ -189,6 +190,11 @@ export default function ExpenseDrawer({
         parseFloat(e.target.value) * tempExpense.currencyRate;
       tempExpense["conversionAmount"] = newConversion;
       tempExpense["amount"] = parseFloat(e.target.value);
+      if (tempExpense["taxPercentage"] !== 0) {
+        tempExpense["taxAmount"] =
+          (tempExpense.amount * tempExpense.taxPercentage) /
+          (100 + tempExpense.taxPercentage);
+      }
     } else {
       //@ts-ignore
       const isFieldNumber = typeof tempExpense[fields[0]] === "number";
@@ -235,7 +241,7 @@ export default function ExpenseDrawer({
   }, [expenseCurrency, targetCurrency, expenseDate]);
 
   useEffect(() => {
-    if (!isFetching && !hasSetCustomFields.current) {
+    if (status === "success" && !hasSetCustomFields.current) {
       if (
         isAddExpenseView &&
         customFieldsData &&
@@ -258,6 +264,22 @@ export default function ExpenseDrawer({
       }));
     }
   }, [customFields]);
+
+  useEffect(() => {
+    if (ohpCodeQuery && !processedDefaultRef.current) {
+      const defaultOhpCode = ohpCodeQuery.find((item) => item.isDefault);
+      if (defaultOhpCode) {
+        setSelectedExpense((prevState) => ({
+          ...prevState,
+          ohpCodeId: defaultOhpCode.id,
+        }));
+        const tempDividedExpenseState = [...dividedExpenseState];
+        tempDividedExpenseState[0].ohpCodeId = defaultOhpCode.id;
+        setDividedExpenseState(tempDividedExpenseState);
+        processedDefaultRef.current = true;
+      }
+    }
+  }, [ohpCodeQuery]);
 
   useEffect(() => {
     if (exchangeRateData.SourceCurrency === exchangeRateData.TargetCurrency) {
@@ -298,7 +320,10 @@ export default function ExpenseDrawer({
                   input={handleChange}
                   placeholder={
                     selectedExpense.ohpCodeId
-                      ? String(selectedExpense.ohpCodeId)
+                      ? getSelectedItemName(
+                          selectedExpense.ohpCodeId,
+                          ohpCodeData
+                        )
                       : t("labels.select")
                   }
                   selectData={ohpCodeData}
@@ -456,7 +481,7 @@ export default function ExpenseDrawer({
                     </div>
                   )}
                 </div>
-                <BlobImage file={`${guid}.jpg`} />
+                {guid && <BlobImage file={`${guid}.jpg`} />}
               </form>
             </MaGridRow>
           </MaGrid>
@@ -511,7 +536,10 @@ export default function ExpenseDrawer({
           )}
         </MaDrawerFooter>
         {isDeleteModalOpen && (
-          <MaDialog isOpen={isDeleteModalOpen}>
+          <MaDialog
+            isOpen={isDeleteModalOpen}
+            onMaClose={() => setDeleteModalOpen(false)}
+          >
             <MaDialogContent>
               <div>{`${selectedExpense.id} id'li masrafı silmek istediğinize emin misiniz?`}</div>
             </MaDialogContent>
@@ -580,6 +608,7 @@ export default function ExpenseDrawer({
             changeStatus={(status) => setDividerDrawerOpen(status)}
             dividedExpenseState={dividedExpenseState}
             setDividedExpenseState={setDividedExpenseState}
+            ohpCodeData={ohpCodeData}
           />
         )}
       </MaDrawer>

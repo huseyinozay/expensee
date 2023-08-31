@@ -48,15 +48,6 @@ export function CustomFields({
     multiple: false,
   });
 
-  const textOfCustomField = (
-    <MaText
-      textStyle={MasraffTypographyFontStyles.Ghosted}
-      className="ma-display-flex ma-size-margin-bottom-8 ma-size-margin-top-8"
-    >
-      {field.fieldName}
-    </MaText>
-  );
-
   const { data: userList } = useQuery<UserEmailData[]>({
     queryKey: ["userEmails"],
     queryFn: async () => getUserEmails(),
@@ -232,7 +223,12 @@ export function CustomFields({
 
   return (
     <div>
-      {textOfCustomField}
+      <MaText
+        textStyle={MasraffTypographyFontStyles.Ghosted}
+        className="ma-display-flex ma-size-margin-bottom-8 ma-size-margin-top-8"
+      >
+        {field.fieldName}
+      </MaText>
       {changeInputElement()}
     </div>
   );

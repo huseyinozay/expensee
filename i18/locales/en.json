@@ -65,7 +65,8 @@
     "divide": "Divide",
     "divideExpense": "Divide Expense",
     "requestForms": "Request Forms",
-    "receipt": "Receipt"
+    "receipt": "Receipt",
+    "dividedExpenseAmountError": "The total amount of splitted expenses cannot exceed the voucher amount."
   },
   "messages": { "hello": "Hello World" },
   "validation": {

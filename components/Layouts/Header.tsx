@@ -13,6 +13,7 @@ import {
 } from "@fabrikant-masraff/masraff-core";
 import { MaButton, MaSpacer, MaText } from "@fabrikant-masraff/masraff-react";
 import styles from "./index.module.css";
+import "../../app/globals.css";
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -44,9 +45,13 @@ const Header: NextPage<HeaderProps> = ({ children }) => {
         </div>
         <div className={`${rowBlockClassname}`}>
           <MaSpacer size={MasraffSpacerSize.S} orientation="horizontal" />
-          <MaText>
-            <span>{firstName + " " + lastName}</span>
-          </MaText>
+          {firstName ? (
+            <MaText>
+              <span>{firstName + " " + lastName}</span>
+            </MaText>
+          ) : (
+            <span className="skeleton-box"></span>
+          )}
           <MaSpacer size={MasraffSpacerSize.M} orientation="horizontal" />
           <MaButton
             colorType={MasraffColorType.Primary}
@@ -61,7 +66,7 @@ const Header: NextPage<HeaderProps> = ({ children }) => {
         </div>
       </div>
 
-      <div style={{marginTop:'50px'}} className="ma-display-flex">
+      <div style={{ marginTop: "50px" }} className="ma-display-flex">
         <div className={styles.sidebarColumn}>
           <div>
             <Sidebar />

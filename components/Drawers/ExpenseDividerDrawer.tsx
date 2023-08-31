@@ -13,6 +13,7 @@ import {
   MaInputCustomEvent,
   MasraffColorType,
   MasraffFillStyle,
+  MasraffInputErrorTypes,
 } from "@fabrikant-masraff/masraff-core";
 import {
   MaButton,
@@ -25,21 +26,24 @@ import {
   MaGrid,
   MaGridRow,
   MaInput,
+  MaInputErrorDisplay,
   MaText,
 } from "@fabrikant-masraff/masraff-react";
-import { filterObjectsByIdAndName } from "@/utils/helpers";
+import { filterObjectsByIdAndName, getSelectedItemName } from "@/utils/helpers";
 import {
   availablePaymentMethods,
   currencyList,
   globalUserObject,
   taxPertangeList,
 } from "@/utils/utils";
+import { CustomFields } from "../CustomFields";
 
 interface DrawerExpenseProps {
   isOpen: boolean;
   changeStatus(arg: boolean): void;
   dividedExpenseState: Expense[];
   setDividedExpenseState: React.Dispatch<React.SetStateAction<Expense[]>>;
+  ohpCodeData: GenericObject[];
 }
 
 export default function ExpenseDividerDrawer({
@@ -47,6 +51,7 @@ export default function ExpenseDividerDrawer({
   changeStatus,
   dividedExpenseState,
   setDividedExpenseState,
+  ohpCodeData,
 }: DrawerExpenseProps) {
   const { t } = useTranslation();
   const { userId, currency: userTargetCurrency } = globalUserObject;
@@ -68,13 +73,17 @@ export default function ExpenseDividerDrawer({
       ? new Date()
       : dividedPartOne.expenseDate,
   });
+
+  const [amountError, setAmountError] = useState(false);
   const {
     currencyRate,
     conversionAmount,
     currency: expenseCurrency,
     expenseDate,
+    customFields: initialCustomFields,
   } = dividedPartOne;
 
+  const [customFields, setCustomFields] = useState<any[]>(initialCustomFields);
   useEffect(() => {
     setExchangeRateData({
       SourceCurrency: expenseCurrency,
@@ -88,14 +97,6 @@ export default function ExpenseDividerDrawer({
     queryFn: async () => getUserOhpCodeDataList(false, userId),
   });
 
-  let ohpCodeData: GenericObject[] = [];
-  if (ohpCodeQuery) {
-    let ohpCodeQueryTransformed = ohpCodeQuery.map((obj) => ({
-      id: obj.id,
-      name: obj.companyOhpCodeValue,
-    }));
-    ohpCodeData = filterObjectsByIdAndName(ohpCodeQueryTransformed);
-  }
   const { data: expenseCategoryData } = useQuery<any[]>({
     queryKey: ["categories"],
     queryFn: async () => getExpenseCategoryData(),
@@ -123,7 +124,8 @@ export default function ExpenseDividerDrawer({
       tempExpense.expenseTypeId = changedCategory.id;
     }
     if (data.name === "taxPercentage") {
-      tempExpense.taxAmount = (tempExpense.amount * data.value) / 100;
+      tempExpense.taxAmount =
+        (tempExpense.amount * data.value) / (100 + data.value);
     }
 
     //@ts-ignore
@@ -138,6 +140,11 @@ export default function ExpenseDividerDrawer({
         parseFloat(e.target.value) * tempExpense.currencyRate;
       tempExpense["conversionAmount"] = newConversion;
       tempExpense["amount"] = parseFloat(e.target.value);
+      if (tempExpense["taxPercentage"] !== 0) {
+        tempExpense["taxAmount"] =
+          (tempExpense.amount * tempExpense.taxPercentage) /
+          (100 + tempExpense.taxPercentage);
+      }
     } else {
       //@ts-ignore
       const isFieldNumber = typeof tempExpense[fields[0]] === "number";
@@ -199,6 +206,13 @@ export default function ExpenseDividerDrawer({
   ]);
 
   useEffect(() => {
+    setDividedPartOne((prevState) => ({
+      ...prevState,
+      customFields: customFields,
+    }));
+  }, [customFields]);
+
+  useEffect(() => {
     if (exchangeRateData.SourceCurrency === exchangeRateData.TargetCurrency) {
       const tempExpense = { ...dividedPartOne };
       tempExpense.currencyRate = 1;
@@ -241,7 +255,10 @@ export default function ExpenseDividerDrawer({
                   input={handleChange}
                   placeholder={
                     dividedPartOne.ohpCodeId
-                      ? String(dividedPartOne.ohpCodeId)
+                      ? getSelectedItemName(
+                          dividedPartOne.ohpCodeId,
+                          ohpCodeData
+                        )
                       : t("labels.select")
                   }
                   selectData={ohpCodeData}
@@ -256,9 +273,20 @@ export default function ExpenseDividerDrawer({
                   type="number"
                   showInputError={false}
                   onMaChange={(el) => {
-                    handleInputChange(el, ["amount", "conversionAmount"]);
+                    if (Number(el.target.value) > selectedExpense.amount) {
+                      setAmountError(true);
+                    } else {
+                      setAmountError(false);
+                      handleInputChange(el, ["amount", "conversionAmount"]);
+                    }
                   }}
                 ></MaInput>
+                {amountError && (
+                  <MaInputErrorDisplay
+                    type={MasraffInputErrorTypes.Inline}
+                    message={t("labels.dividedExpenseAmountError")}
+                  />
+                )}
                 <MaText className="ma-display-flex ma-size-margin-bottom-8 ma-size-margin-top-8">
                   {t("labels.currency")}
                 </MaText>
@@ -383,6 +411,23 @@ export default function ExpenseDividerDrawer({
                   >
                     <span>{t("labels.toBeBilled")}</span>
                   </MaCheckbox>
+                  {customFields && customFields.length > 0 && (
+                    <div>
+                      {customFields.map((field, index) => (
+                        <div
+                          style={{ paddingTop: "8px", paddingBottom: "8px" }}
+                          key={field.id}
+                        >
+                          <CustomFields
+                            field={field}
+                            index={index}
+                            data={customFields}
+                            setData={(value) => setCustomFields(value)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </form>
             </MaGridRow>

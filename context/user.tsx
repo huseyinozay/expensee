@@ -62,6 +62,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       setUser(response);
       setUserId(response.userId);
       setCompanyId(response.companyId);
+      setSasToken(response.sasToken)
       setStatus("loaded");
       localStorage.setItem("access_token", response.access_token);
       localStorage.setItem("refresh_token", response.refresh_token);

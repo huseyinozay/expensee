@@ -20,7 +20,6 @@ export default function ExpenseDetail() {
           const result = await api.get(`v1/expenses/${expenseId}`);
           // @ts-ignore
           setExpense(result);
-          console.log(expense);
         } catch (error) {
           console.error("Bir hata oluştu:", error);
         }

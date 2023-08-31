@@ -96,7 +96,8 @@
     "divide": "Böl",
     "divideExpense": "Masrafı Böl",
     "requestForms": "Talep Formları",
-    "receipt": "Fiş"
+    "receipt": "Fiş",
+    "dividedExpenseAmountError": "Bölünmüş masrafların toplam tutarı, fiş tutarını aşamaz."
   },
   "messages": { "hello": "Merhaba Dünya" },
   "validation": {

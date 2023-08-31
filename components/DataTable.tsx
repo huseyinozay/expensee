@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-key */
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { BlobImage } from "./BlobImage";
 import { MasraffSize, MasraffIconNames } from "@fabrikant-masraff/masraff-core";
@@ -51,7 +51,7 @@ function processAndOrderDataByFieldTitlePairs(
 
         if (typeof value === "string" && value.startsWith("BLOBIMAGE_")) {
           const fileId = value.replace("BLOBIMAGE_", "");
-          console.log('fileId::',fileId)
+
           value = <BlobImage isThumbnail file={`${fileId}.jpg`} />;
         }
 
@@ -79,31 +79,49 @@ export default function DataTable({
     data,
     column
   );
+  const tableRef = useRef<HTMLMaDisplayTableElement | null>(null);
 
   const { t } = useTranslation();
 
   useEffect(() => {
-    const elements = document.getElementsByClassName("table-cell");
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "childList" && tableRef.current) {
+          const elements =
+            tableRef.current.getElementsByClassName("table-cell");
 
-    if (elements) {
-      for (var i = 0; i < elements.length; i++) {
-        const shadowRoot = elements[i].shadowRoot;
-        const style = document.createElement("style");
-        style.innerHTML = `.ma-display-table-cell-content { width: initial !important}`;
-        if (shadowRoot) shadowRoot.appendChild(style);
-      }
+          for (var i = 0; i < elements.length; i++) {
+            const shadowRoot = elements[i].shadowRoot;
+            const style = document.createElement("style");
+            style.innerHTML = `.ma-display-table-cell-content { width: initial !important}`;
+            if (shadowRoot) {
+              const existingStyle = shadowRoot.querySelector("style");
+              if (existingStyle) {
+                existingStyle.remove();
+              }
+              shadowRoot.appendChild(style);
+            }
+          }
+        }
+      });
+    });
+
+    if (tableRef.current) {
+      observer.observe(tableRef.current, { childList: true, subtree: true });
     }
+
+    return () => observer.disconnect();
   }, []);
 
   function renderCellValue(value: any) {
     if (React.isValidElement(value)) {
-      return value;  
+      return value;
     }
     return <div dangerouslySetInnerHTML={{ __html: value }} />;
   }
 
   return (
-    <MaDisplayTable size={MasraffSize.Normal}>
+    <MaDisplayTable size={MasraffSize.Normal} ref={tableRef}>
       <MaDisplayTableBody>
         <MaDisplayTableRow sticky={true} header={true}>
           <MaDisplayTableCell

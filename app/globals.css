@@ -156,3 +156,22 @@ body,
   text-align: center;
   height: 50px;
 }
+
+.skeleton-box {
+  display: inline-block;
+  height: 20px;
+  width: 100px; 
+  background: linear-gradient(90deg, #f0f0f0, #b4a6ff, #f0f0f0);
+  background-size: 200% 100%;
+  animation: shine 1.5s infinite;
+}
+
+
+@keyframes shine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

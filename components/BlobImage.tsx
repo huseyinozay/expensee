@@ -4,7 +4,7 @@ import React from "react";
 
 interface BlobImageProps {
   file: string;
-  isThumbnail?: boolean
+  isThumbnail?: boolean;
 }
 
 export function BlobImage({ file, isThumbnail = false }: BlobImageProps) {
@@ -21,7 +21,11 @@ export function BlobImage({ file, isThumbnail = false }: BlobImageProps) {
       <img
         src={`${imageRawBaseUrl}${containerName}/${file}${sasToken}`}
         alt=""
-        style={ isThumbnail ? {width: "45px", height: "45px", borderRadius: '50%'} : {width: "100px", height: "100px"  }}
+        style={
+          isThumbnail
+            ? { width: "45px", height: "45px", borderRadius: "50%" }
+            : { width: "100px", height: "100px" }
+        }
       />
     </a>
   );

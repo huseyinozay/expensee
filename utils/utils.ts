@@ -359,7 +359,7 @@ export const emptyExpense = {
   receiptNumber: "",
   merchant: "",
   reportId: null,
-  ohpCodeId: 0,
+  ohpCodeId: null,
   attendeesList: [],
   attendeesNumber: 1,
   expenseType: { name: "" },

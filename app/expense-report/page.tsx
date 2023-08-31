@@ -20,7 +20,6 @@ export default async function Hydation() {
   await queryClient.prefetchQuery(["expenses",defaultFilter],getExpensesReport);
   const dehydratedState = dehydrate(queryClient);
 
-  console.log('dehydratedState',dehydratedState)
 
   return (
     <Hydrate state={dehydratedState}>
