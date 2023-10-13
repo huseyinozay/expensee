@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useDropzone } from "react-dropzone";
@@ -7,7 +7,12 @@ import { getUserEmails } from "@/app/api/expense";
 import { uploadCustomFieldFile } from "@/app/api/expenseCustomReport";
 import Dropdown from "./Dropdown";
 import { BlobImage } from "./BlobImage";
-import { MaButton, MaInput, MaText } from "@fabrikant-masraff/masraff-react";
+import {
+  MaButton,
+  MaDateInput,
+  MaInput,
+  MaText,
+} from "@fabrikant-masraff/masraff-react";
 import {
   MasraffColorType,
   MasraffFillStyle,
@@ -20,6 +25,7 @@ import {
   filterObjectsByIdAndGivenField,
   filterObjectsByIdAndValue,
 } from "@/utils/helpers";
+import { DropdownSelection, GenericObject, UserEmailData } from "@/utils/types";
 
 interface CustomFieldsProps {
   field: any;
@@ -39,6 +45,15 @@ export function CustomFields({
   const containerName = `prod-${companyId}`;
   const [file, setFile] = useState<string>("");
   const [postedFilename, setPostedFileName] = useState<string>("");
+  const [editing, setIsEditing] = useState<any | undefined>(undefined);
+
+  const inputRef = useRef<
+    | HTMLMaInputElement
+    | HTMLMaNumericInputElement
+    | HTMLMaDateInputElement
+    | null
+  >(null);
+
   const { getRootProps, getInputProps } = useDropzone({
     //@ts-ignore
     accept: "image/*",
@@ -116,6 +131,7 @@ export function CustomFields({
             fullWidth
             onMaInput={(e) => handleCustomFieldsChange(e, index)}
             value={field.customValue ? String(field.customValue) : ""}
+            ref={inputRef as any}
           />
         );
         break;
@@ -125,28 +141,43 @@ export function CustomFields({
           <MaInput
             fullWidth
             value={field.customValue ? String(field.customValue) : ""}
+            onMaBlur={() => {
+              if (editing) {
+                setIsEditing(!editing);
+              }
+            }}
             type="number"
             showInputError={false}
             onMaInput={(e) => handleCustomFieldsChange(e, index)}
+            ref={inputRef as any}
           />
         );
         break;
       case 3:
         inputElement = (
-          <div
-            style={{ color: "Red", paddingTop: "8px", paddingBottom: "8px" }}
-          >
-            {/* <MaDateInput
-                fullWidth
-                max={new Date()}
-                value={
-                  !field.customValue ? undefined : new Date(field.customValue)
-                }
-                onMaDateChange={(e) => handleCustomFieldsChange(e, index, "date")}
-                shouldCloseOnSelect
-              /> */}
-            After solving blocksfabrikk bug, date input will come here
-          </div>
+          <MaDateInput
+            fullWidth
+            fillStyle={MasraffFillStyle.Solid}
+            onMaBlur={() => {
+              if (editing) {
+                setIsEditing(!editing);
+              }
+            }}
+            placeholder={
+              field.customValue ? field.customValue : t("labels.select")
+            }
+            size={MasraffSize.Normal}
+            ref={inputRef as any}
+            value={!field.customValue ? undefined : new Date(field.customValue)}
+            onMaDateChange={(e) => handleCustomFieldsChange(e, index, "date")}
+            onMaKeyDown={(e) => {
+              const key = e.detail.key;
+              if (key === "Enter" || key === "Escape") {
+                e.target.blurElement();
+              }
+            }}
+            shouldCloseOnSelect
+          />
         );
         break;
       case 4:
@@ -220,6 +251,12 @@ export function CustomFields({
       field.customValue = postedFilename;
     }
   }, [postedFilename]);
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focusElement();
+    }
+  }, [editing]);
 
   return (
     <div>

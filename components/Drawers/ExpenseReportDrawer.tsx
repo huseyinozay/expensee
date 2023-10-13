@@ -34,6 +34,7 @@ import {
   updateExpenseReport,
 } from "@/app/api/expenseReport";
 import { useUserState } from "@/context/user";
+import { AdvanceReport, DropdownSelection, Expense, ExpenseReport, GenericObject, SubCompany, TripReport } from "@/utils/types";
 
 interface ExpenseReportDrawerProps {
   isOpen: boolean;

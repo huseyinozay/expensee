@@ -1,7 +1,9 @@
 /* eslint-disable react/jsx-key */
+import { useEffect, useRef, useState } from "react";
 import {
   MasraffSelectionType,
   MasraffIconNames,
+  MasraffFillStyle,
 } from "@fabrikant-masraff/masraff-core";
 import {
   MaSelect,
@@ -9,9 +11,9 @@ import {
   MaPopover,
   MaList,
   MaListItem,
-  MaTagInput,
+  MaInput,
 } from "@fabrikant-masraff/masraff-react";
-import { useEffect, useRef } from "react";
+import { GenericObject } from "@/utils/types";
 
 type InputData = {
   name: string;
@@ -38,10 +40,12 @@ export default function Dropdown({
   isSelectValueByName = false,
   selectionType = MasraffSelectionType.Single,
 }: DropDownProps) {
+  const [editing, setIsEditing] = useState<any | undefined>(undefined);
+
   const rowBlock =
     "ma-display-flex ma-display-flex-row ma-display-flex-align-items-center";
 
-  const selectRef = useRef<any>();
+  const selectRef = useRef<HTMLMaSelectElement>();
 
   const handleChange = (e: any) => {
     // @ts-ignore
@@ -56,6 +60,12 @@ export default function Dropdown({
   };
 
   useEffect(() => {
+    if (editing && selectRef.current) {
+      selectRef.current.focusElement();
+    }
+  }, [editing]);
+
+  useEffect(() => {
     clearSelection();
   }, [reset]);
 
@@ -66,17 +76,23 @@ export default function Dropdown({
       onMaItemSelect={(e) => {
         handleChange(e);
       }}
-      ref={selectRef}
+      ref={selectRef as any}
       shouldCloseOnSelect
       disabled={disabled}
     >
-      <MaTagInput
-        placeholder={placeholder}
-        className="ma-custom-select-class"
+      <MaInput
+        fillStyle={MasraffFillStyle.Solid}
         slot="select-target"
+        placeholder={placeholder}
+        onMaBlur={() => {
+          if (editing) {
+            setIsEditing(undefined);
+          }
+        }}
+        resizeWithText
       >
         <MaIcon iconName={MasraffIconNames.CaretDown} slot="right" />
-      </MaTagInput>
+      </MaInput>
       <MaPopover>
         <MaList>
           {selectData &&

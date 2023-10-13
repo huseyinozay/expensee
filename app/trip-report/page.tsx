@@ -1,8 +1,8 @@
+import { dehydrate } from "@tanstack/query-core";
+import { getCustomReportsView } from "../api/expenseCustomReport";
+import TripReport from "./TripReport";
 import getQueryClient from "@/utils/getQueryClient";
 import Hydrate from "@/utils/hydrate.client";
-import { dehydrate } from "@tanstack/query-core";
-import ExpenseReport from "./ExpenseReport";
-import { getExpensesReport } from "../api/expenseReport";
 
 
 
@@ -14,16 +14,15 @@ export default async function Hydation() {
     page: 0,
     pageSize: 10,
     ascending: "false",
-    searchTypeId: 0,
+    isCoreReport: true
   };
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(["expenses",defaultFilter],getExpensesReport);
+  await queryClient.prefetchQuery(["tripReports",defaultFilter],getCustomReportsView);
   const dehydratedState = dehydrate(queryClient);
-
 
   return (
     <Hydrate state={dehydratedState}>
-      <ExpenseReport />
+        <TripReport/>
     </Hydrate>
   );
 }

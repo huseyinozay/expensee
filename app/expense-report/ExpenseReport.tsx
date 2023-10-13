@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import DataTable from "@/components/DataTable";
@@ -13,6 +13,7 @@ import { fetchUserOhpCodeData, getTagData } from "../api/expense";
 import {
   MaAccordion,
   MaButton,
+  MaContainer,
   MaDateRangeInput,
   MaField,
   MaInput,
@@ -32,7 +33,11 @@ import NoData from "@/components/NoData";
 import ExpenseReportDrawer from "@/components/Drawers/ExpenseReportDrawer";
 import ExpenseReportDetailDrawer from "@/components/Drawers/ExpenseReportDetailDrawer";
 import Dropdown from "@/components/Dropdown";
-import { filterObjectsByIdAndName } from "@/utils/helpers";
+import {
+  filterObjectsByIdAndName,
+  formatDateToGMT,
+  getFormattedExpenseReportData,
+} from "@/utils/helpers";
 import {
   expenseReportColumns,
   waitingApprovalReportColumns,
@@ -41,9 +46,21 @@ import {
   deliveryStatusList,
   expenseReportSearchTypes,
   paymentMethodList,
-  statusList,
+  reportStatusList,
 } from "@/utils/utils";
 import { useUserState } from "@/context/user";
+import {
+  ExpenseReport,
+  GenericObject,
+  MasraffResponse,
+  OhpCodeData,
+  SubCompany,
+  TagData,
+  filterStateType,
+} from "@/utils/types";
+import { FilterWrapper } from "@/components/MasraffLayout/FilterWrapper";
+import { Filters } from "@/components/MasraffLayout/Filters";
+import { ExpenseReportTable } from "./ExpenseReportTable";
 
 type InputData = {
   name: string;
@@ -56,7 +73,6 @@ export default function ExpenseReport() {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenReportDetail, setOpenReportDetail] = useState(false);
   const [reset, setReset] = useState(false);
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [row, setRow] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -71,21 +87,12 @@ export default function ExpenseReport() {
     ascending: "false",
     searchTypeId: 0,
   };
-  const rowBlock =
-    "ma-display-flex ma-display-flex-row ma-display-flex-align-items-center ma-size-margin-bottom-8";
 
   const [filter, setFilter] = useState<{ [key: string]: any }>(defaultFilter);
   const [filterData, setFilterData] = useState<{
     [key: string]: number | string;
   }>({});
-
-  const today = new Date();
-  const min = new Date(
-    today.getFullYear() - 5,
-    today.getMonth(),
-    today.getDate()
-  );
-  const max = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const {
     data: expenseReportQuery,
@@ -146,6 +153,81 @@ export default function ExpenseReport() {
   if (subCompaniesQuery)
     subCompanies = filterObjectsByIdAndName(subCompaniesQuery);
 
+  const initialExpenseReportFilterState = [
+    {
+      id: "createDateStart,createDateEnd",
+      type: "dateRange",
+      placeholder: "Tarih Aralığı",
+      value: undefined,
+    },
+    {
+      id: "searchTypeId",
+      type: "single-select",
+      placeholder: "Türü",
+      value: undefined,
+      selectionData: expenseReportSearchTypes,
+    },
+    {
+      id: "searchValue",
+      type: "string",
+      placeholder: "Ara",
+      value: undefined,
+    },
+    {
+      id: "statuses",
+      type: "multi-select",
+      placeholder: "Durumu",
+      value: undefined,
+      selectionData: reportStatusList,
+    },
+    {
+      id: "paymentMethodTypes",
+      type: "multi-select",
+      placeholder: "Ödeme Tipi",
+      value: undefined,
+      selectionData: paymentMethodList,
+    },
+    {
+      id: "tagIds",
+      type: "multi-select",
+      placeholder: "Etiket",
+      value: undefined,
+      selectionData: tagData,
+    },
+    {
+      id: "subCompanyIds",
+      type: "multi-select",
+      placeholder: "Organizasyon",
+      value: undefined,
+      selectionData: subCompanies,
+    },
+    {
+      id: "ohpCodeIds",
+      type: "multi-select",
+      placeholder: "Masraf Merkezi",
+      value: undefined,
+      selectionData: ohpCodeData,
+    },
+    {
+      id: "isDelivered",
+      type: "multi-select",
+      placeholder: "Teslim Durumu",
+      value: undefined,
+      selectionData: deliveryStatusList,
+    },
+    {
+      id: "paymentMethodTypes",
+      type: "multi-select",
+      placeholder: "Ödeme Tipi",
+      value: undefined,
+      selectionData: paymentMethodList,
+    },
+  ];
+
+  const [expenseReportFilterState, setExpenseReportFilterState] = useState<
+    filterStateType[]
+  >(initialExpenseReportFilterState);
+
   const changeStatus: any = (isOpen: boolean) => {
     setIsOpen(isOpen);
     refetch();
@@ -153,35 +235,22 @@ export default function ExpenseReport() {
   const changeDetailStatus: any = (isOpen: boolean) => {
     setOpenReportDetail(isOpen);
   };
-  const setDateRange = (data: Array<Date | undefined>) => {
-    if (data[0] !== undefined) {
-      filterData["createDateStart"] = data[0]?.toISOString();
-    }
-    if (data[1] !== undefined) {
-      filterData["createDateEnd"] = data[1]?.toISOString();
-    }
-  };
-  const input = (data: InputData) => {
-    if (data.value !== undefined) {
-      filterData[data.name] = data.value;
-    } else if (data.value === undefined) {
-      delete filterData[data.name];
-    }
-  };
-  const resetFilterData = () => {
-    setFilter(defaultFilter);
-    setFilterData({});
-    setReset(!reset);
-    inputRef.current?.clearValue();
-    dateInputRef.current?.clearValue();
+
+  const onClickFilter = () => {
+    setFilter({ ...filter, ...filterData });
   };
 
-  const onClickExpenseReportDetail: any = (id: any) => {
+  const onClickExpenseReportRow: any = (
+    id: any,
+    isDetailOpener: boolean = false
+  ) => {
     if (expenseReportData) {
       const currentRow = expenseReportData.filter(
         (item: any) => item.id === id
       );
       setRow(currentRow[0]);
+      if (isDetailOpener) changeDetailStatus(true);
+      else changeStatus(true);
     }
   };
 
@@ -194,296 +263,78 @@ export default function ExpenseReport() {
     }
   };
 
+  useEffect(() => {
+    if (ohpCodeQuery && tagDataQuery && subCompaniesQuery) {
+      const ohpCodeQueryTransformed = ohpCodeQuery.map((obj) => ({
+        id: obj.id,
+        name: obj.companyOhpCodeValue,
+      }));
+      const ohpCodeData = filterObjectsByIdAndName(ohpCodeQueryTransformed);
+
+      const tagData = filterObjectsByIdAndName(tagDataQuery.results);
+      const subCompanies = filterObjectsByIdAndName(subCompaniesQuery);
+
+      const updatedExpenseReportFilterState = expenseReportFilterState.map(
+        (filter) => {
+          if (filter.id === "tagIds") {
+            return {
+              ...filter,
+              selectionData: tagData,
+            };
+          } else if (filter.id === "ohpCodeIds") {
+            return {
+              ...filter,
+              selectionData: ohpCodeData,
+            };
+          } else if (filter.id === "subCompanyIds") {
+            return {
+              ...filter,
+              selectionData: subCompanies,
+            };
+          } else {
+            return filter;
+          }
+        }
+      );
+
+      setExpenseReportFilterState(updatedExpenseReportFilterState);
+    }
+  }, [ohpCodeQuery, tagDataQuery, subCompaniesQuery, userId]);
+
+  useEffect(() => {
+    setFilter(defaultFilter);
+    const differences: Record<string, any> = {};
+
+    expenseReportFilterState.forEach((item) => {
+      if (item.id.includes(",")) {
+        const ids = item.id.split(",");
+        if (Array.isArray(item.value)) {
+          ids.forEach((id, idx) => {
+            const currentValue = item.value[idx];
+            if (currentValue !== null && currentValue !== undefined) {
+              if (item.type === "dateRange")
+                differences[id] = formatDateToGMT(currentValue);
+              else differences[id] = currentValue;
+            }
+          });
+        }
+      } else {
+        const value = item.value;
+        if (value !== null && value !== undefined) {
+          if (Array.isArray(value)) {
+            differences[item.id] = value; // If it's already an array, keep it as is
+          } else {
+            differences[item.id] = [value]; // Wrap single value in an array
+          }
+        }
+      }
+    });
+
+    setFilterData(differences);
+  }, [expenseReportFilterState]);
+
   return (
     <>
-      <h4 style={{ borderBottom: "2px solid #fbd14b ", height: "50px" }}>
-        {t("labels.expenseReports")}
-      </h4>
-      <MaSpacer size={MasraffSpacerSize.M} />
-
-      <div className="ma-display-flex ma-display-flex-column">
-        <MaTabStrip
-          tabContainerId="report-container"
-          className="ma-size-margin-bottom-16"
-        >
-          <MaTabItem tabContentId="report">{t("labels.form")}</MaTabItem>
-          <MaTabItem tabContentId="awaiting-approval">
-            {t("labels.awaitingApproval")}
-          </MaTabItem>
-        </MaTabStrip>
-        <div>
-          <MaTabContainer
-            activeTabContentId="report"
-            tabContainerId="report-container"
-          >
-            {
-              <MaTabContent tabContentId="report">
-                <div
-                  className="ma-display-flex ma-display-flex-column"
-                  style={{
-                    padding: "5px",
-                    overflowX: "scroll",
-                    width: "2500px",
-                  }}
-                >
-                  <div>
-                    <MaButton
-                      onMaClick={() => {
-                        setRow({});
-                        changeStatus(true);
-                      }}
-                      className="ma-size-padding-right-16"
-                    >
-                      {t("labels.add")}
-                    </MaButton>
-                    <MaButton
-                      onMaClick={() => setIsAccordionOpen(!isAccordionOpen)}
-                      colorType={MasraffColorType.Primary}
-                    >
-                      {t("labels.filter")}
-                    </MaButton>
-
-                    <MaAccordion isOpen={isAccordionOpen}>
-                      <div
-                        style={{ boxSizing: "border-box" }}
-                        className="ma-size-padding-top-16 ma-size-padding-right-16 ma-size-padding-left-16 ma-display-fullwidth"
-                      >
-                        <MaSeparator
-                          marginObject={{
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            right: 0,
-                          }}
-                          orientation="horizontal"
-                        />
-                        <MaSpacer
-                          size={MasraffSpacerSize.M}
-                          orientation="vertical"
-                        />
-                        <MaField>
-                          <div
-                            style={{ flexFlow: "wrap" }}
-                            className="ma-display-flex ma-display-flex-row"
-                          >
-                            <div className={`${rowBlock}`}>
-                              <MaDateRangeInput
-                                locale="tr"
-                                min={min}
-                                max={max}
-                                className="ma-custom-filter-date-input-class"
-                                fullWidth={true}
-                                popoverPlacement="bottom"
-                                shouldCloseOnSelect
-                                onMaDateChange={(e) => {
-                                  Array.isArray(e.target.value) &&
-                                    setDateRange(e.target.value);
-                                }}
-                                ref={dateInputRef}
-                              />
-                              <MaSpacer
-                                size={MasraffSpacerSize.M}
-                                orientation="horizontal"
-                              />
-                            </div>
-                            <div className={`${rowBlock}`}>
-                              <Dropdown
-                                input={input}
-                                placeholder="Türü"
-                                selectData={expenseReportSearchTypes}
-                                valueName="searchTypeId"
-                                reset={reset}
-                              />
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-                            <div className={`${rowBlock}`}>
-                              <MaInput
-                                placeholder="Aranacak Değer"
-                                className="Ma-custom-select-class"
-                                slot="select-target"
-                                onMaChange={(e) => {
-                                  filterData["searchValue"] = e.target.value;
-                                }}
-                                ref={inputRef}
-                              ></MaInput>
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-                            <div className={`${rowBlock}`}>
-                              <Dropdown
-                                input={input}
-                                placeholder="Durumu"
-                                selectData={statusList}
-                                valueName="statuses"
-                                reset={reset}
-                              />
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-                            <div className={`${rowBlock}`}>
-                              <Dropdown
-                                input={input}
-                                placeholder="Etiket"
-                                selectData={tagData}
-                                valueName="tagIds"
-                                reset={reset}
-                              />
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-                            <div className={`${rowBlock}`}>
-                              <Dropdown
-                                input={input}
-                                placeholder="Organizasyon"
-                                selectData={subCompanies}
-                                valueName="tagIds"
-                                reset={reset}
-                              />
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-
-                            <div className={`${rowBlock}`}>
-                              <Dropdown
-                                input={input}
-                                placeholder="Masraf Merkezi"
-                                selectData={ohpCodeData}
-                                valueName="ohpCodeIds"
-                                reset={reset}
-                              />
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-                            <div className={`${rowBlock}`}>
-                              <Dropdown
-                                input={input}
-                                placeholder="Teslim Durumu"
-                                selectData={deliveryStatusList}
-                                valueName="isDelivered"
-                                reset={reset}
-                              />
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-                            <div className={`${rowBlock}`}>
-                              <Dropdown
-                                input={input}
-                                placeholder="Ödeme Tipi"
-                                selectData={paymentMethodList}
-                                valueName="paymentMethodTypes"
-                                reset={reset}
-                              />
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-                            <div className={`${rowBlock}`}>
-                              <MaButton
-                                colorType={MasraffColorType.Primary}
-                                onMaClick={() => {
-                                  setFilter({ ...filter, ...filterData });
-                                }}
-                                className="ma-size-padding-right-8"
-                              >
-                                {t("labels.search")}
-                              </MaButton>
-                              <MaButton onMaClick={resetFilterData}>
-                                {t("labels.clear")}
-                              </MaButton>
-
-                              <MaSpacer
-                                size={MasraffSpacerSize.S}
-                                orientation="horizontal"
-                              />
-                            </div>
-                          </div>
-                        </MaField>
-                      </div>
-                    </MaAccordion>
-                  </div>
-                  <MaSpacer size={MasraffSpacerSize.M} />
-
-                  {isLoadingReports ? (
-                    <Loading />
-                  ) : (
-                    <>
-                      {expenseReportData && expenseReportData.length > 0 ? (
-                        <>
-                          <DataTable
-                            column={expenseReportColumns}
-                            data={expenseReportData}
-                            changeStatus={changeStatus}
-                            changeStatus2={changeDetailStatus}
-                            hasSecondaryInteraction
-                            setRowId={onClickExpenseReportDetail}
-                          />
-
-                          <div style={{ padding: "10px" }}>
-                            {t("labels.page")} {currentPage + 1}/{totalPages}
-                            <p style={{ paddingTop: "5px" }}>
-                              {t("labels.totalResult")}: {totalCount}
-                            </p>
-                            <MaButton
-                              style={{ paddingRight: "5px", paddingTop: "5px" }}
-                              onMaClick={() => {
-                                if (currentPage === 0) return;
-                                filter.page = currentPage - 1;
-                                setCurrentPage(currentPage - 1);
-                              }}
-                            >
-                              {t("labels.previous")}
-                            </MaButton>
-                            <MaButton
-                              onMaClick={() => {
-                                filter.page = currentPage + 1;
-                                setCurrentPage(currentPage + 1);
-                              }}
-                            >
-                              {t("labels.next")}
-                            </MaButton>
-                          </div>
-                        </>
-                      ) : (
-                        <NoData />
-                      )}
-                    </>
-                  )}
-                </div>
-              </MaTabContent>
-            }
-            <MaTabContent tabContentId="awaiting-approval">
-              {waitingApprovalReportsData.length > 0 ? (
-                <DataTable
-                  column={waitingApprovalReportColumns}
-                  data={waitingApprovalReportsData}
-                  changeStatus={changeStatus}
-                  changeStatus2={changeDetailStatus}
-                  hasSecondaryInteraction
-                  setRowId={onClickWaitingExpenseReportDetail}
-                />
-              ) : (
-                <NoData />
-              )}
-            </MaTabContent>
-          </MaTabContainer>
-        </div>
-      </div>
       {isOpen && (
         <ExpenseReportDrawer
           isOpen={isOpen}
@@ -498,6 +349,153 @@ export default function ExpenseReport() {
           data={row}
         />
       )}
+      <FilterWrapper
+        pageName={t("labels.expenseReports")}
+        filtersOpen={filtersOpen}
+        setFiltersOpen={setFiltersOpen}
+        onAddClick={() => {
+          setRow({});
+          changeStatus(true);
+        }}
+        activeFilters={
+          expenseReportFilterState.filter((f) => f.value !== undefined).length
+        }
+        filters={
+          <Filters
+            filters={expenseReportFilterState.map((f: any) => {
+              return {
+                ...f,
+                onValueChange: (value: any) => {
+                  let newValue = [...expenseReportFilterState];
+                  const index = newValue.findIndex(
+                    (filter) => filter.id === f.id
+                  );
+
+                  if (index !== -1) {
+                    newValue[index] = {
+                      ...newValue[index],
+                      value,
+                    };
+                  }
+                  setExpenseReportFilterState(newValue);
+                },
+              };
+            })}
+            onClearValues={() => {
+              setFilter(defaultFilter);
+              setFilterData({});
+              setExpenseReportFilterState(initialExpenseReportFilterState);
+            }}
+            onClickFilter={onClickFilter}
+          />
+        }
+      />
+      {isLoadingReports ? (
+        <Loading />
+      ) : (
+        <>
+          {expenseReportData && expenseReportData.length > 0 ? (
+            <>
+              <ExpenseReportTable
+                data={getFormattedExpenseReportData(expenseReportData)}
+                onOpenRow={(id) => onClickExpenseReportRow(id)}
+                onOpenDetailRow={(id) => onClickExpenseReportRow(id, true)}
+              />
+
+              <div style={{ padding: "10px" }}>
+                {t("labels.page")} {currentPage + 1}/{totalPages}
+                <p style={{ paddingTop: "5px" }}>
+                  {t("labels.totalResult")}: {totalCount}
+                </p>
+                <MaButton
+                  style={{ paddingRight: "5px", paddingTop: "5px" }}
+                  onMaClick={() => {
+                    if (currentPage === 0) return;
+                    filter.page = currentPage - 1;
+                    setCurrentPage(currentPage - 1);
+                  }}
+                >
+                  {t("labels.previous")}
+                </MaButton>
+                <MaButton
+                  onMaClick={() => {
+                    filter.page = currentPage + 1;
+                    setCurrentPage(currentPage + 1);
+                  }}
+                >
+                  {t("labels.next")}
+                </MaButton>
+              </div>
+            </>
+          ) : (
+            <NoData />
+          )}
+        </>
+      )}
+
+      {/* <MaTabContainer
+        activeTabContentId="report"
+        tabContainerId="report-container"
+      >
+        <MaTabContent tabContentId="report">
+          {isLoadingReports ? (
+            <Loading />
+          ) : (
+            <>
+              {expenseReportData && expenseReportData.length > 0 ? (
+                <>
+                  <ExpenseReportTable
+                    data={getFormattedExpenseReportData(expenseReportData)}
+                    onOpenRow={(id) => onClickExpenseReportRow(id)}
+                  />
+
+                  <div style={{ padding: "10px" }}>
+                    {t("labels.page")} {currentPage + 1}/{totalPages}
+                    <p style={{ paddingTop: "5px" }}>
+                      {t("labels.totalResult")}: {totalCount}
+                    </p>
+                    <MaButton
+                      style={{ paddingRight: "5px", paddingTop: "5px" }}
+                      onMaClick={() => {
+                        if (currentPage === 0) return;
+                        filter.page = currentPage - 1;
+                        setCurrentPage(currentPage - 1);
+                      }}
+                    >
+                      {t("labels.previous")}
+                    </MaButton>
+                    <MaButton
+                      onMaClick={() => {
+                        filter.page = currentPage + 1;
+                        setCurrentPage(currentPage + 1);
+                      }}
+                    >
+                      {t("labels.next")}
+                    </MaButton>
+                  </div>
+                </>
+              ) : (
+                <NoData />
+              )}
+            </>
+          )}
+        </MaTabContent>
+
+        <MaTabContent tabContentId="awaiting-approval">
+          {waitingApprovalReportsData.length > 0 ? (
+            <DataTable
+              column={waitingApprovalReportColumns}
+              data={waitingApprovalReportsData}
+              changeStatus={changeStatus}
+              changeStatus2={changeDetailStatus}
+              hasSecondaryInteraction
+              setRowId={onClickWaitingExpenseReportDetail}
+            />
+          ) : (
+            <NoData />
+          )}
+        </MaTabContent>
+      </MaTabContainer> */}
     </>
   );
 }

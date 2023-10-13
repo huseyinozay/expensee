@@ -37,6 +37,7 @@ import {
   taxPertangeList,
 } from "@/utils/utils";
 import { CustomFields } from "../CustomFields";
+import { DropdownSelection, Expense, GenericObject, OhpCodeData } from "@/utils/types";
 
 interface DrawerExpenseProps {
   isOpen: boolean;

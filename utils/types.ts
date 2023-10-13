@@ -1,4 +1,6 @@
-interface MasraffResponse {
+import { MasraffSelectionType } from "@fabrikant-masraff/masraff-core";
+
+export interface MasraffResponse {
   lastIndex: number;
   pageSize: Number;
   results: any;
@@ -6,20 +8,72 @@ interface MasraffResponse {
   totalPages: number;
 }
 
-type GenericObject = {
+export type GenericObject = {
   id: number | string | boolean;
   name: string;
 };
 
-interface ExpenseData extends MasraffResponse {
+export interface ExpenseData extends MasraffResponse {
   allExpenseIds: Array<number>;
 }
 
-interface CustomReportFormsData extends MasraffResponse {
+export interface TripReport {
+  id: number;
+  reportId: number;
+  firstName: string;
+  lastName: string;
+  tckn: string;
+  dateOfBirth: string;
+  gsm: string;
+  email: string;
+  departman: string;
+  position: string;
+  tripApprover: number;
+  invoiceApprover: number;
+  invoiceCompany: number;
+  tripReason: string;
+  tripLocation: string;
+  departureDate: string;
+  returnDate: string;
+  firstHotelName: string;
+  secondHotelName: string;
+  hotelEntryDate: string;
+  hotelExitDate: string;
+  secondHotelEntryDate: string;
+  secondHotelExitDate: string;
+  departureAirport: string;
+  returnAirport: string;
+  flightDepartureDate: string;
+  flightReturnDate: string;
+  vehicle: string;
+  origin: string;
+  destination: string;
+  originDate: string;
+  destinationDate: string;
+  rentalCarOrigin: string;
+  rentalCarOriginDate: string;
+  rentalCarDestination: string;
+  rentalCarDestinationDate: string;
+  driverLicenseNo: string;
+  driverLicensePlace: string;
+  driverLicenseClass: string;
+  driverLicenseDate: string;
+  passportNo: string;
+  passportValidityDate: string;
+  visaStartingDate: string;
+  visaCountry: string;
+  tripApproverMail: string;
+  invoiceApproverEmail: string;
+  invoiceCompanyText: string;
+  cityId: number;
+  isItAbroad: boolean;
+}
+
+export interface CustomReportFormsData extends MasraffResponse {
   enableReportIdsForExport: number[];
 }
 
-interface CustomFormType {
+export interface CustomFormType {
   id: number;
   companyId: number;
   name: string;
@@ -27,7 +81,7 @@ interface CustomFormType {
   status: number;
 }
 
-interface FormCustomFields {
+export interface FormCustomFields {
   id: number;
   companyId: number;
   subCompanyId: number;
@@ -42,7 +96,7 @@ interface FormCustomFields {
   customFieldValues: any[];
 }
 
-interface CustomReport {
+export interface CustomReport {
   id: number;
   userId: number;
   approverUserId: number;
@@ -85,11 +139,19 @@ interface CustomReport {
   startDate: null; // Modify when needed.
   endDate: null; // Modify when needed.
   tripReportId: null; // Modify when needed.
-  description: null; // Modify when needed.
-  ohpCodeId: null; // Modify when needed.
+  description: string; // Modify when needed.
+  ohpCodeId: number;
   isItAbroad: boolean;
-  tripReport: null; // Modify when needed.
-  advanceReport: null; // Modify when needed.
+  tripReport: TripReport;
+  advanceReport: {
+    id: number;
+    reportId: number;
+    conversionAmount: number;
+    currencyRate: number;
+    cityId: number;
+    country: string;
+    day: string;
+  };
   denialNote: null; // Modify when needed.
   advanceReportId: null; // Modify when needed.
   tag_LookupId: null; // Modify when needed.
@@ -98,20 +160,20 @@ interface CustomReport {
   isExcludeFromBatchExports: boolean;
 }
 
-interface CustomReportForm {
+export interface CustomReportForm {
   userBySubCompyList: any[];
   report: CustomReport;
 }
 
-interface TagData extends MasraffResponse {
+export interface TagData extends MasraffResponse {
   results: GenericObject[];
 }
 
-type DropdownSelection = {
+export type DropdownSelection = {
   value: any;
   name: string;
 };
-interface SubCompany {
+export interface SubCompany {
   id: number;
   name: string;
   code: string;
@@ -121,17 +183,7 @@ interface SubCompany {
   updateDate: string;
 }
 
-interface TripReport {
-  userTripReportList: any[];
-  isEnableForExpenseReport: boolean;
-}
-
-interface AdvanceReport {
-  id: number;
-  name: string;
-}
-
-interface OhpCodeData {
+export interface OhpCodeData {
   companyOhpCodeDescription: string;
   companyOhpCodeId: number;
   companyOhpCodeValue: string;
@@ -140,8 +192,34 @@ interface OhpCodeData {
   status: number;
   userId: number;
 }
+type User = {
+  companyId: number;
+  approverUserId: number;
+  userName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  thumbnailUrl: string;
+  emailConfirmed: boolean;
+  language: number;
+  currency: number;
+  scheduledFrequency: number;
+  scheduledFrequencyText: string | null;
+  emailEnabled: boolean;
+  pushEnabled: boolean;
+  status: number;
+  createDate: string; // could also be Date if parsed
+  updateDate: string; // could also be Date if parsed
+  lastLoginDate: string; // could also be Date if parsed
+  company: any | null; // Use a more specific type if known
+  roles: any[]; // Use a more specific type for the array items if known
+  ohpCode: string | null;
+  showExpensePreEdit: boolean;
+  defaultPaymentMethod: any | null; // Use a more specific type if known
+  isDeliveryNotificationsEnabled: boolean;
+};
 
-type Expense = {
+export type Expense = {
   id: number;
   name: string;
   approverUserId: number;
@@ -173,9 +251,10 @@ type Expense = {
   attendeesNumber: number;
   expenseType: { name: string };
   guid: string;
+  user: User;
 };
 
-interface ExpenseReport {
+export interface ExpenseReport {
   advanceReport: any;
   advanceReportId: number;
   approvedDate: string;
@@ -227,26 +306,104 @@ interface ExpenseReport {
   delegatedUserId: string | null;
 }
 
-type CreateReport = {
+export interface AdvanceReport {
+  id: number;
+  userId: number;
+  userByComapnyId: number;
+  subCompanyName: string;
+  name: string;
+  customReportType: string;
+  approverUserId: number;
+  status: number;
+  statusText: string;
+  userEmail: string;
+  sendDate: string;
+  approverFullName: string;
+  approvedDate: string;
+  reportType: number;
+  tripReportId: number;
+  advanceReportId: number;
+  denialNote: string;
+  isExcludeFromBatchExports: boolean;
+}
+
+export type CreateReport = {
   name: string;
   delegatedUserId: string | null;
   subCompanyId: number | null;
   user: Object;
 };
 
-type ExchangeRate = {
+export type ExchangeRate = {
   SourceCurrency: number;
   TargetCurrency: number;
   RateDate: Date;
 };
 
-interface SelectionData {
+export interface SelectionData {
   name: string;
   value: number | undefined;
 }
 
-interface UserEmailData {
+export interface UserEmailData {
   id: number;
   userName: string;
   fullName: string;
+}
+
+export interface filterStateType {
+  id: string;
+  type: string;
+  value: any;
+  placeholder: string;
+  selectionData?: GenericObject[];
+}
+
+export interface ExpenseTableData {
+  combinedAmount: string;
+  createDate: string;
+  expenseDate: string;
+  expenseTypeId: string;
+  guid: any;
+  id: number;
+  merchant: string;
+  paymentMethod: string;
+  status: string;
+  user: string;
+}
+
+export interface ExpenseReportTableData {
+  totalAmount: string;
+  name: string;
+  subCompanyName: string;
+  approver: string;
+  isDelivered: boolean;
+  id: number;
+  sendDate: string;
+  approvedDate: string;
+  statusText: string;
+  user: string;
+}
+
+export interface AdvanceReportTableData {
+  id: number;
+  name: string;
+  userEmail: string;
+  organizationName: string;
+  statusText: string;
+  approver: string;
+  sendDate: string;
+  approvedDate: string;
+}
+
+export interface CustomReportTableData {
+  name: string;
+  subCompanyName: string;
+  approverFullName: string;
+  customReportType: string;
+  id: number;
+  sendDate: string;
+  approvedDate: string;
+  status: string;
+  userEmail: string;
 }

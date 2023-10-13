@@ -1,4 +1,11 @@
 import i18n from "@/i18/i18";
+import {
+  CreateReport,
+  CustomReportForm,
+  ExpenseReport,
+  GenericObject,
+  TripReport,
+} from "./types";
 
 const AUTH_PAGES = ["/login", "/register"];
 
@@ -11,7 +18,19 @@ const userString =
   typeof localStorage !== "undefined" && localStorage.getItem("user");
 export const globalUserObject = userString && JSON.parse(userString);
 
-export const expenseStatus = {
+const today = new Date();
+export const minDate = new Date(
+  today.getFullYear() - 5,
+  today.getMonth(),
+  today.getDate()
+);
+export const maxDate = new Date(
+  today.getFullYear(),
+  today.getMonth(),
+  today.getDate()
+);
+
+export const expenseStatus: { [index: number]: string } = {
   1: i18n.t("labels.processing"),
   2: i18n.t("labels.ready"),
   3: i18n.t("labels.waiting"),
@@ -53,10 +72,6 @@ export const paymentMethods = {
 };
 
 export const expenseSearchTypes = [
-  {
-    id: 1,
-    name: i18n.t("labels.select"),
-  },
   {
     id: 1,
     name: i18n.t("labels.expenseNo"),
@@ -113,12 +128,48 @@ export const expenseReportSearchTypes = [
 export const statusList = [
   { id: 1, name: i18n.t("labels.processing") },
   { id: 2, name: i18n.t("labels.ready") },
-  { id: 3, name: i18n.t("labels.waiting") },
+  { id: 3, name: i18n.t("labels.waitingForApproval") },
   { id: 4, name: i18n.t("labels.approved") },
   { id: 5, name: i18n.t("labels.rejected") },
   { id: 6, name: i18n.t("labels.archived") },
+  { id: 7, name: i18n.t("labels.deleted") },
   { id: 8, name: i18n.t("labels.completed") },
-  { id: 9, name: i18n.t("labels.missingData") },
+  { id: 9, name: i18n.t("labels.editWaiting") },
+  { id: 10, name: i18n.t("labels.inQueue") },
+  { id: 11, name: i18n.t("labels.waitingForPayment") },
+  { id: 12, name: i18n.t("labels.errorInPayment") },
+  { id: 13, name: i18n.t("labels.paymentCompleted") },
+  { id: 14, name: i18n.t("labels.loading") },
+  { id: 15, name: i18n.t("labels.infoRequired") },
+  { id: 16, name: i18n.t("labels.uploadError") },
+];
+
+export const reportStatusList = [
+  { id: 0, name: i18n.t("labels.processing") },
+  { id: 1, name: i18n.t("labels.ready") },
+  { id: 2, name: i18n.t("labels.waitingForApproval") },
+  { id: 3, name: i18n.t("labels.approved") },
+  { id: 4, name: i18n.t("labels.rejected") },
+  { id: 5, name: i18n.t("labels.archived") },
+  { id: 6, name: i18n.t("labels.deleted") },
+  { id: 7, name: i18n.t("labels.completed") },
+  { id: 8, name: i18n.t("labels.waitingForPayment") },
+  { id: 9, name: i18n.t("labels.errorInPayment") },
+  { id: 10, name: i18n.t("labels.paymentCompleted") },
+  { id: 12, name: i18n.t("labels.sentForApproval") },
+  { id: 13, name: i18n.t("labels.editWaiting") },
+];
+
+export const expenseCustomFormsStatusList = [
+  { id: 1, name: i18n.t("labels.processing") },
+  { id: 2, name: i18n.t("labels.ready") },
+  { id: 3, name: i18n.t("labels.waitingForApproval") },
+  { id: 4, name: i18n.t("labels.approved") },
+  { id: 5, name: i18n.t("labels.rejected") },
+  { id: 6, name: i18n.t("labels.archived") },
+  { id: 7, name: i18n.t("labels.deleted") },
+  { id: 8, name: i18n.t("labels.completed") },
+  { id: 9, name: i18n.t("labels.editWaiting") },
   { id: 10, name: i18n.t("labels.inQueue") },
   { id: 11, name: i18n.t("labels.waitingForPayment") },
   { id: 12, name: i18n.t("labels.errorInPayment") },
@@ -424,8 +475,60 @@ export const emptyCreateReport: CreateReport = {
   user: {},
 };
 
+const emptyTripReport: TripReport = {
+  id: 0,
+  reportId: 0,
+  firstName: "",
+  lastName: "",
+  tckn: "",
+  dateOfBirth: "",
+  gsm: "",
+  email: "",
+  departman: "",
+  position: "",
+  tripApprover: 0,
+  invoiceApprover: 0,
+  invoiceCompany: 0,
+  tripReason: "",
+  tripLocation: "",
+  departureDate: "",
+  returnDate: "",
+  firstHotelName: "",
+  secondHotelName: "",
+  hotelEntryDate: "",
+  hotelExitDate: "",
+  secondHotelEntryDate: "",
+  secondHotelExitDate: "",
+  departureAirport: "",
+  returnAirport: "",
+  flightDepartureDate: "",
+  flightReturnDate: "",
+  vehicle: "",
+  origin: "",
+  destination: "",
+  originDate: "",
+  destinationDate: "",
+  rentalCarOrigin: "",
+  rentalCarOriginDate: "",
+  rentalCarDestination: "",
+  rentalCarDestinationDate: "",
+  driverLicenseNo: "",
+  driverLicensePlace: "",
+  driverLicenseClass: "",
+  driverLicenseDate: "",
+  passportNo: "",
+  passportValidityDate: "",
+  visaStartingDate: "",
+  visaCountry: "",
+  tripApproverMail: "",
+  invoiceApproverEmail: "",
+  invoiceCompanyText: "",
+  cityId: 0,
+  isItAbroad: false,
+};
+
 export const emptyCustomReportForm: CustomReportForm = {
-  userBySubCompyList:[],
+  userBySubCompyList: [],
   report: {
     id: 0,
     userId: 0,
@@ -458,20 +561,22 @@ export const emptyCustomReportForm: CustomReportForm = {
       createDate: "",
       status: 0,
     },
-    customFields: [{
-      id: 0,
-      companyId: 0,
-      subCompanyId: 0,
-      fieldName: "",
-      valueType: 0,
-      fieldType: 0,
-      customReportId: 0,
-      isRequired: false,
-      createDate: "",
-      status: 0,
-      customValue: null,
-      customFieldValues: [],
-    }],
+    customFields: [
+      {
+        id: 0,
+        companyId: 0,
+        subCompanyId: 0,
+        fieldName: "",
+        valueType: 0,
+        fieldType: 0,
+        customReportId: 0,
+        isRequired: false,
+        createDate: "",
+        status: 0,
+        customValue: null,
+        customFieldValues: [],
+      },
+    ],
     customReportType: null,
     hasBudget: false,
     integratedWorkflowResult: null,
@@ -482,11 +587,19 @@ export const emptyCustomReportForm: CustomReportForm = {
     startDate: null,
     endDate: null,
     tripReportId: null,
-    description: null,
-    ohpCodeId: null,
+    description: "",
+    ohpCodeId: 0,
     isItAbroad: false,
-    tripReport: null,
-    advanceReport: null,
+    tripReport: emptyTripReport,
+    advanceReport: {
+      id: 0,
+      reportId: 0,
+      conversionAmount: 0,
+      currencyRate: 0,
+      cityId: 0,
+      country: "",
+      day: "",
+    },
     denialNote: null,
     advanceReportId: null,
     tag_LookupId: null,
@@ -495,3 +608,65 @@ export const emptyCustomReportForm: CustomReportForm = {
     isExcludeFromBatchExports: false,
   },
 };
+
+export const tripReportCategories = [
+  {
+    title: "personalInfo",
+    fields: ["firstName", "lastName", "tckn", "dateOfBirth", "gsm", "email"],
+  },
+  {
+    title: "approvers",
+    fields: ["tripApproverMail", "invoiceApproverEmail"],
+  },
+  {
+    title: "trip",
+    fields: ["tripReason", "tripLocation"],
+  },
+  {
+    title: "tripDates",
+    fields: ["departureDate", "returnDate"],
+  },
+  {
+    title: "firstHotelInfo",
+    fields: ["firstHotelName", "hotelEntryDate", "hotelExitDate"],
+  },
+  {
+    title: "secondHotelInfo",
+    fields: ["secondHotelName", "secondHotelEntryDate", "secondHotelExitDate"],
+  },
+  { title: "airport", fields: ["departureAirport", "returnAirport"] },
+  { title: "flightDates", fields: ["flightDepartureDate", "flightReturnDate"] },
+  { title: "route", fields: ["origin", "destination"] },
+  {
+    title: "routeDates",
+    fields: ["originDate", "destinationDate"],
+  },
+  {
+    title: "rental",
+    fields: [
+      "vehicle",
+      "rentalCarOrigin",
+      "rentalCarOriginDate",
+      "rentalCarDestination",
+      "rentalCarDestinationDate",
+    ],
+  },
+  {
+    title: "driver",
+    fields: [
+      "driverLicenseNo",
+      "driverLicensePlace",
+      "driverLicenseClass",
+      "driverLicenseDate",
+    ],
+  },
+  {
+    title: "visaPassport",
+    fields: [
+      "passportNo",
+      "passportValidityDate",
+      "visaStartingDate",
+      "visaCountry",
+    ],
+  },
+];

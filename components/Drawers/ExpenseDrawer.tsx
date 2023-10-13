@@ -19,12 +19,19 @@ import ExpenseDividerDrawer from "./ExpenseDividerDrawer";
 import Dropdown from "@/components/Dropdown";
 import {
   MaInputCustomEvent,
+  MasraffColorName,
+  MasraffColorShadeName,
   MasraffColorType,
   MasraffFillStyle,
+  MasraffIconNames,
+  MasraffInputErrorTypes,
+  MasraffSize,
 } from "@fabrikant-masraff/masraff-core";
 import {
+  MaAvatar,
   MaButton,
   MaCheckbox,
+  MaContainer,
   MaDateInput,
   MaDialog,
   MaDialogContent,
@@ -36,24 +43,39 @@ import {
   MaDrawerHeader,
   MaGrid,
   MaGridRow,
+  MaIcon,
   MaInput,
+  MaLink,
+  MaSeparator,
+  MaTag,
   MaText,
 } from "@fabrikant-masraff/masraff-react";
 import {
   filterObjectsByIdAndName,
   filterObjectsByIdAndValue,
   getFormattedExpenseData,
+  getIconForExpense,
   getSelectedItemName,
+  statusTagPicker,
 } from "@/utils/helpers";
 import {
   availablePaymentMethods,
   currencyList,
   emptyExpense,
+  expenseStatus,
   taxPertangeList,
 } from "@/utils/utils";
 import { expenseColumnsSimplified } from "@/utils/data";
 import { CustomFields } from "../CustomFields";
 import { BlobImage } from "../BlobImage";
+import i18n from "@/i18/i18";
+import {
+  DropdownSelection,
+  Expense,
+  GenericObject,
+  MasraffResponse,
+  OhpCodeData,
+} from "@/utils/types";
 
 interface DrawerExpenseProps {
   isOpen: boolean;
@@ -295,8 +317,105 @@ export default function ExpenseDrawer({
       <MaDrawer isOpen={isOpen} onMaClose={() => changeStatus(false)}>
         <MaDrawerHeader>
           {isAddExpenseView ? t("labels.addExpense") : t("labels.editExpense")}
+          <MaContainer
+            horizontalAlignment="left"
+            verticalAlignment="center"
+            horizontalGap={8}
+          >
+            <MaContainer
+              padding={4}
+              borderRadius={6}
+              backgroundColor={{
+                color: MasraffColorName.Mustard,
+                shadeName: MasraffColorShadeName.Lightest,
+              }}
+            >
+              <MaIcon
+                size={16}
+                color={MasraffColorName.Mustard}
+                shadeName={MasraffColorShadeName.Darkest}
+                iconName={getIconForExpense(selectedExpense.expenseType.name)}
+              />
+            </MaContainer>
+            <span>{selectedExpense.id}</span>
+            <MaTag
+              colorType={statusTagPicker(expenseStatus[selectedExpense.status])}
+            >
+              {expenseStatus[selectedExpense.status]}
+            </MaTag>
+          </MaContainer>
         </MaDrawerHeader>
+
         <MaDrawerContent>
+          <MaContainer
+            fullWidth={true}
+            elevation="one"
+            borderRadius={6}
+            padding={4}
+          >
+            <MaContainer direction="column" verticalGap={8} width={"20%"}>
+              <h6>{t("labels.expenseNo")}</h6>
+              <MaContainer horizontalGap={8}>
+                <MaContainer
+                  padding={4}
+                  borderRadius={6}
+                  backgroundColor={{
+                    color: MasraffColorName.Verdigris,
+                    shadeName: MasraffColorShadeName.Lightest,
+                  }}
+                >
+                  <MaIcon
+                    size={16}
+                    color={MasraffColorName.Verdigris}
+                    shadeName={MasraffColorShadeName.Darkest}
+                    iconName={MasraffIconNames.Document}
+                  />
+                </MaContainer>
+                <MaLink>{selectedExpense.id}</MaLink>
+              </MaContainer>
+            </MaContainer>
+            <MaContainer direction="column" verticalGap={8} width={"20%"}>
+              <h6>{t("labels.user")}</h6>
+              {selectedExpense.user && (
+                <MaContainer horizontalGap={8}>
+                  <MaAvatar
+                    size={MasraffSize.Small}
+                    firstName={selectedExpense.user.firstName.split(" ")[0]}
+                    lastName={selectedExpense.user.lastName.split(" ")[1]}
+                    userId="1234567asdasd"
+                  />
+                  <MaLink>
+                    {selectedExpense.user.firstName +
+                      " " +
+                      selectedExpense.user.lastName}
+                  </MaLink>
+                </MaContainer>
+              )}
+            </MaContainer>
+            <MaContainer direction="column" verticalGap={8} width={"20%"}>
+              <h6>{t("labels.expenseDate")}</h6>
+              <span>
+                {new Date(selectedExpense.expenseDate).toLocaleDateString(
+                  "tr-TR"
+                )}
+              </span>
+            </MaContainer>
+            <MaContainer direction="column" verticalGap={8} width={"20%"}>
+              <h6>{t("labels.amount")}</h6>
+              <span>
+                {selectedExpense.amount} {selectedExpense.currencyText}
+              </span>
+            </MaContainer>
+            <MaContainer
+              direction="column"
+              verticalGap={8}
+              width={"20%"}
+              className="ma-display-flex-justify-content-center ma-size-padding-bottom-16"
+            >
+              {guid && <BlobImage file={`${guid}.jpg`} />}
+            </MaContainer>
+          </MaContainer>
+
           <MaGrid>
             <MaGridRow>
               <form>
@@ -336,9 +455,16 @@ export default function ExpenseDrawer({
                   fullWidth
                   value={String(selectedExpense.amount)}
                   type="number"
-                  showInputError={false}
+                  showInputError={MasraffInputErrorTypes.Tooltip}
                   onMaChange={(el) => {
                     handleInputChange(el, ["amount", "conversionAmount"]);
+                  }}
+                  required
+                  validations={{
+                    ValueMissing: {
+                      checkValidity: (value) => value,
+                      errorMessage: "Custom message",
+                    },
                   }}
                 ></MaInput>
                 <MaText className="ma-display-flex ma-size-margin-bottom-8 ma-size-margin-top-8">
@@ -430,6 +556,12 @@ export default function ExpenseDrawer({
                   onMaDateChange={handleDateChange}
                   required
                   shouldCloseOnSelect
+                  validations={{
+                    ValueMissing: {
+                      checkValidity: (value) => value,
+                      errorMessage: "Custom message",
+                    },
+                  }}
                 ></MaDateInput>
                 <MaText className="ma-display-flex ma-size-margin-top-8 ma-size-margin-bottom-8">
                   {t("labels.description")}
@@ -481,7 +613,6 @@ export default function ExpenseDrawer({
                     </div>
                   )}
                 </div>
-                {guid && <BlobImage file={`${guid}.jpg`} />}
               </form>
             </MaGridRow>
           </MaGrid>

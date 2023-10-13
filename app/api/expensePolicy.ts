@@ -1,9 +1,16 @@
-import { Expense, ExpenseData, MasraffResponse, OhpCodeData, TagData, UserEmailData } from "@/utils/types";
+import {
+  Expense,
+  ExpenseData,
+  MasraffResponse,
+  OhpCodeData,
+  TagData,
+  UserEmailData,
+} from "@/utils/types";
 import ApiService from "./route";
 
 const api = new ApiService();
 
-export async function getExpenses(filter: object): Promise<ExpenseData> {
+export async function getPolicyExpenses(filter: object): Promise<ExpenseData> {
   const response = await api.get("v1/adminExpense", filter);
 
   if (!response) {
@@ -95,11 +102,16 @@ export function deleteExpense(
   );
 }
 
-export function divideExpense(dividedExpenses: Expense[],delegatedUserId: number | null){
-  return api.post(`v1/mobile/divideExpense/${dividedExpenses[0].id}?delegatedUserId=${delegatedUserId}`,dividedExpenses)
+export function divideExpense(
+  dividedExpenses: Expense[],
+  delegatedUserId: number | null
+) {
+  return api.post(
+    `v1/mobile/divideExpense/${dividedExpenses[0].id}?delegatedUserId=${delegatedUserId}`,
+    dividedExpenses
+  );
 }
 
-export function getUserEmails() : Promise<UserEmailData[]> {
-  return api.get('v1/users/userEmails')
-
+export function getUserEmails(): Promise<UserEmailData[]> {
+  return api.get("v1/users/userEmails");
 }

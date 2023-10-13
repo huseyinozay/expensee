@@ -6,24 +6,19 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18/i18";
 import {
   getExpenseCategoryData,
-  getExpenses,
+  getPolicyExpenses,
   getTagData,
-} from "../api/expense";
-import { ExpenseTable } from "./ExpenseTable";
+} from "../api/expensePolicy";
+import { ExpensePolicyTable } from "./ExpensePolicyTable";
 import { FilterWrapper } from "@/components/MasraffLayout/FilterWrapper";
 import { Filters } from "@/components/MasraffLayout/Filters";
 import { Loading } from "@/components/Loading/Loading";
 import ExpenseDrawer from "@/components/Drawers/ExpenseDrawer";
-import {
-  MaButton,
-  MaField,
-  MaIcon,
-  MaInput,
-} from "@fabrikant-masraff/masraff-react";
+import { MaButton } from "@fabrikant-masraff/masraff-react";
 import {
   filterObjectsByIdAndName,
   formatDateToGMT,
-  getFormattedExpenseData,
+  getFormattedExpensePolicyData,
 } from "@/utils/helpers";
 import {
   expenseSearchTypes,
@@ -37,10 +32,6 @@ import {
   filterStateType,
 } from "@/utils/types";
 import "../globals.css";
-import {
-  MasraffIconNames,
-  MasraffInputErrorTypes,
-} from "@fabrikant-masraff/masraff-core";
 
 export default function Expense() {
   const { t } = useTranslation();
@@ -52,6 +43,7 @@ export default function Expense() {
     pageSize: 10,
     ascending: "false",
     searchTypeId: 0,
+    isActiveExpenseTypeLimit: true,
   };
 
   const [filter, setFilter] = useState<{ [key: string]: any }>(defaultFilter);
@@ -68,7 +60,7 @@ export default function Expense() {
     refetch,
   } = useQuery<ExpenseData>({
     queryKey: ["expenses", filter],
-    queryFn: async () => getExpenses(filter),
+    queryFn: async () => getPolicyExpenses(filter),
   });
 
   const { data: tagData } = useQuery<TagData>({
@@ -118,13 +110,6 @@ export default function Expense() {
       placeholder: "Ödeme Tipi",
       value: undefined,
       selectionData: paymentMethodList,
-    },
-    {
-      id: "tagIds",
-      type: "multi-select",
-      placeholder: "Etiket",
-      value: undefined,
-      selectionData: tags,
     },
     {
       id: "expenseTypeId",
@@ -233,10 +218,6 @@ export default function Expense() {
         pageName={t("labels.expenses")}
         filtersOpen={filtersOpen}
         setFiltersOpen={setFiltersOpen}
-        onAddClick={() => {
-          setSelectedExpense({});
-          changeStatus(true);
-        }}
         activeFilters={
           expenseFilterState.filter((f) => f.value !== undefined).length
         }
@@ -276,8 +257,8 @@ export default function Expense() {
       ) : (
         <>
           {expenseData && (
-            <ExpenseTable
-              data={getFormattedExpenseData(
+            <ExpensePolicyTable
+              data={getFormattedExpensePolicyData(
                 expenseData?.results,
                 expenseCategories
               )}

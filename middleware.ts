@@ -47,8 +47,8 @@ export async function middleware(request: any) {
     //   store.dispatch(logoutUser());
     //   return NextResponse.redirect(new URL(`/login`, url));
     // }
-    // if (isAuthPageRequested)
-    //   return NextResponse.redirect(new URL(`/expense`, url));
+    if (isAuthPageRequested)
+      return NextResponse.redirect(new URL(`/expense`, url));
   }
 
   if (!token && !isAuthPageRequested) {

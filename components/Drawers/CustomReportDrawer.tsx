@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import Dropdown from "../Dropdown";
 import { filterObjectsByIdAndName } from "@/utils/helpers";
 import { CustomFields } from "../CustomFields";
+import { CustomReportForm, DropdownSelection } from "@/utils/types";
 
 interface CustomReportDrawerProps {
   isOpen: boolean;

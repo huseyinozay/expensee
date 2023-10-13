@@ -1,3 +1,4 @@
+import { CustomFormType, CustomReport, CustomReportForm, CustomReportFormsData } from "@/utils/types";
 import ApiService from "./route";
 
 const api = new ApiService();

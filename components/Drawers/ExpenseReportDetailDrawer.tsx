@@ -32,6 +32,8 @@ import {
 import { expenseColumns } from "@/utils/data";
 import { getFormattedExpenseData } from "@/utils/helpers";
 import QRCode from "react-qr-code";
+import { Expense, ExpenseReport, MasraffResponse } from "@/utils/types";
+import { ExpenseTable } from "@/app/expense/ExpenseTable";
 
 interface ExpenseReportDetailDrawerProps {
   isOpen: boolean;
@@ -127,12 +129,10 @@ export default function ExpenseReportDetailDrawer({
               {isLoadingExpenseReport ? (
                 <Loading />
               ) : (
-                <div style={{ marginTop: "25px", maxWidth: "600px" }}>
-                  <DataTable
-                    data={getFormattedExpenseData(expenseReportData)}
-                    column={expenseColumns}
-                  />
-                </div>
+                <ExpenseTable
+                  data={getFormattedExpenseData(expenseReportData)}
+                  isInDrawer
+                />
               )}
             </MaGridRow>
             <MaSpacer size={MasraffSpacerSize.Xs} />
