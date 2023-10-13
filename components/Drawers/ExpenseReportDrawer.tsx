@@ -34,7 +34,15 @@ import {
   updateExpenseReport,
 } from "@/app/api/expenseReport";
 import { useUserState } from "@/context/user";
-import { AdvanceReport, DropdownSelection, Expense, ExpenseReport, GenericObject, SubCompany, TripReport } from "@/utils/types";
+import {
+  AdvanceReport,
+  DropdownSelection,
+  Expense,
+  ExpenseReport,
+  GenericObject,
+  SubCompany,
+  TripReport,
+} from "@/utils/types";
 
 interface ExpenseReportDrawerProps {
   isOpen: boolean;
@@ -66,6 +74,7 @@ export default function ExpenseReportDrawer({
     []
   );
   const [userTripReport, setUserTripReport] = useState<TripReport>({
+    // @ts-ignore
     userTripReportList: [],
     isEnableForExpenseReport: false,
   });
@@ -213,6 +222,7 @@ export default function ExpenseReportDrawer({
                   input={handleChange}
                   disabled={!selectedExpenseReport.tripReport}
                   placeholder={selectedExpenseReport.tripReport?.name}
+                  // @ts-ignore
                   selectData={userTripReport.userTripReportList}
                   valueName="tripReport"
                 />

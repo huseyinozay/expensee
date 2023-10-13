@@ -4,6 +4,7 @@ import { MaText } from "@fabrikant-masraff/masraff-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import ApiService from "@/app/api/route";
+import { Expense } from "@/utils/types";
 
 const api = new ApiService();
 

@@ -394,6 +394,7 @@ export default function TripReportDrawer({
                       direction="column"
                       borderRadius={6}
                       padding={8}
+                      key={category.title}
                     >
                       <MaContainer
                         style={{ marginBottom: "16px" }}
@@ -418,6 +419,7 @@ export default function TripReportDrawer({
                                     style={{ height: "90px" }}
                                     direction="column"
                                     width={"32%"}
+                                    key={field}
                                   >
                                     {renderField(field, value, false)}
                                   </MaContainer>
@@ -438,6 +440,7 @@ export default function TripReportDrawer({
                                       style={{ height: "90px" }}
                                       direction="column"
                                       width={"32%"}
+                                      key={field}
                                     >
                                       {renderField(field, value, false)}
                                     </MaContainer>
@@ -456,6 +459,7 @@ export default function TripReportDrawer({
                                 <MaContainer
                                   direction="column"
                                   width={`${98 / numOfFields}%`}
+                                  key={field}
                                 >
                                   {renderField(field, value, false)}
                                 </MaContainer>
