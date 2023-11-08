@@ -6,6 +6,7 @@ import {
   MaButton,
   MaContainer,
   MaIcon,
+  MaInput,
   MaText,
 } from "@fabrikant-masraff/masraff-react";
 import React, { useEffect, useState } from "react";
@@ -55,58 +56,58 @@ export default function Workflow() {
   const changeStatus: any = (isOpen: boolean) => {
     setDrawerOpened(isOpen);
   };
+  const [companyId, setCompanyId] = useState<string>("3406");
 
   const {
     data: workflowData,
     isSuccess: isSuccessWorkflow,
     isLoading: isLoadingWorkflow,
   } = useQuery<WorkflowRuleSteps[]>({
-    queryKey: ["workflowData"],
+    queryKey: ["workflowData", companyId],
     staleTime: Infinity,
-    queryFn: async () => getWorkflowData(),
-    enabled: ruleSteps.length === 0,
+    queryFn: async () => getWorkflowData(companyId),
   });
 
   const { data: userData } = useQuery<GenericObject[]>({
-    queryKey: ["userData"],
+    queryKey: ["userData", companyId],
     staleTime: Infinity,
-    queryFn: async () => getWorkflowUsers(),
+    queryFn: async () => getWorkflowUsers(companyId),
   });
 
   const { data: subCompanyData } = useQuery<GenericObject[]>({
-    queryKey: ["subCompanyData"],
+    queryKey: ["subCompanyData", companyId],
     staleTime: Infinity,
-    queryFn: async () => getSubCompanies(),
+    queryFn: async () => getSubCompanies(companyId),
   });
 
   const { data: userGroupData } = useQuery<GenericObject[]>({
-    queryKey: ["userGroupData"],
+    queryKey: ["userGroupData", companyId],
     staleTime: Infinity,
-    queryFn: async () => getUserGroups(),
+    queryFn: async () => getUserGroups(companyId),
   });
 
   const { data: expenseTypeData } = useQuery<GenericObject[]>({
-    queryKey: ["expenseTypeData"],
+    queryKey: ["expenseTypeData", companyId],
     staleTime: Infinity,
-    queryFn: async () => getExpenseTypes(),
+    queryFn: async () => getExpenseTypes(companyId),
   });
 
   const { data: tagData } = useQuery<GenericObject[]>({
-    queryKey: ["tagData"],
+    queryKey: ["tagData", companyId],
     staleTime: Infinity,
-    queryFn: async () => getTags(),
+    queryFn: async () => getTags(companyId),
   });
 
   const { data: departmentData } = useQuery<GenericObject[]>({
-    queryKey: ["departmentData"],
+    queryKey: ["departmentData", companyId],
     staleTime: Infinity,
-    queryFn: async () => getDepartments(),
+    queryFn: async () => getDepartments(companyId),
   });
 
   const { data: gradeData } = useQuery<GenericObject[]>({
-    queryKey: ["gradeData"],
+    queryKey: ["gradeData", companyId],
     staleTime: Infinity,
-    queryFn: async () => getGrades(),
+    queryFn: async () => getGrades(companyId),
   });
 
   useEffect(() => {
@@ -441,6 +442,10 @@ export default function Workflow() {
           className="ma-size-margin-top-8"
           direction="column"
         >
+          <MaText className="ma-display-flex ma-size-margin-top-8 ma-size-margin-bottom-8">
+            {t("labels.company")}
+          </MaText>
+          <MaInput onMaChange={(el) => setCompanyId(el.target.value)}></MaInput>
           {isLoadingWorkflow ? (
             <Loading />
           ) : (

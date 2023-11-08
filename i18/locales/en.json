@@ -131,7 +131,8 @@
     "expensePolicy": "Expense Policy",
     "difference": "Difference",
     "limit": "Limit",
-    "workflow": "Complex Workflow"
+    "workflow": "Complex Workflow",
+    "company": "Company"
   },
   "messages": { "hello": "Hello World" },
   "validation": {

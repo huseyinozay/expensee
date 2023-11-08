@@ -162,7 +162,8 @@
     "expensePolicy": "Gider Politikaları",
     "difference": "Fark",
     "limit": "Limit",
-    "workflow": "Gelişmiş Onay Akışı"
+    "workflow": "Gelişmiş Onay Akışı",
+    "company": "Şirket"
   },
   "messages": { "hello": "Merhaba Dünya" },
   "validation": {
