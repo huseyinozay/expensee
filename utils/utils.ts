@@ -529,22 +529,21 @@ const emptyTripReport: TripReport = {
   isItAbroad: false,
 };
 
-
-
 export const emptyBranch: WorkflowBranch = {
   index: 0,
   condition: {
     triggerType: [],
-    conditionText: ""
+    conditionText: "",
   },
-  approvers: []
+  approvers: [],
 };
 
-export const emptyStep : WorkflowStep = {
+export const emptyStep: WorkflowStep = {
   startIndex: 0,
   endIndex: 0,
   branches: [],
-}
+  condition: { triggerType: [], conditionText: "" },
+};
 
 export const emptyCustomReportForm: CustomReportForm = {
   userBySubCompyList: [],

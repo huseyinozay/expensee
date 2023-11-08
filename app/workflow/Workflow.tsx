@@ -18,7 +18,9 @@ import {
   getSubCompanies,
   getUserGroups,
   getExpenseTypes,
-  getTags, getDepartments, getGrades
+  getTags,
+  getDepartments,
+  getGrades,
 } from "@/app/api/workflow";
 import {
   GenericObject,
@@ -30,7 +32,10 @@ import WorkflowDrawer from "@/components/Drawers/WorkflowDrawer";
 import { useTranslation } from "react-i18next";
 import { Loading } from "@/components/Loading/Loading";
 import { emptyBranch, emptyStep } from "@/utils/utils";
-import {MasraffColorType, MasraffIconNames} from "@fabrikant-masraff/masraff-core";
+import {
+  MasraffColorType,
+  MasraffIconNames,
+} from "@fabrikant-masraff/masraff-core";
 
 export default function Workflow() {
   const { t } = useTranslation();
@@ -217,7 +222,7 @@ export default function Workflow() {
     5: subCompanies,
     7: expenseTypes,
     12: userGroups,
-    21: grades
+    21: grades,
   };
   const getTriggers = (data: any) => {
     if (
@@ -276,11 +281,11 @@ export default function Workflow() {
           let valueText = _.trim(textList[0]).slice(0, -1);
 
           // 8 12
-          const triggerTypeValue = conditionTriggerTypeList[valueTextIndex]
+          const triggerTypeValue = conditionTriggerTypeList[valueTextIndex];
           valueText = getConditionTextInTurkishWithNames(
-              valueText,
-              triggerTypeText,
-              triggerTypeValue
+            valueText,
+            triggerTypeText,
+            triggerTypeValue
           );
           resultList.push(
             `${currentOperator}${triggerTypeText} ${functionNameText} ${valueText}`
@@ -301,24 +306,24 @@ export default function Workflow() {
       }
 
       return `Koşul: ${_.join(resultList, "")}`;
-    }
-    else if (data.condition && data.condition.triggerType){
+    } else if (data.condition && data.condition.triggerType) {
       // Linear son onayci vs.
     }
 
     return "";
   };
 
-
-
-  function getConditionTextInTurkish(conditionText: any, triggerTypeText: string | any[]) {
+  function getConditionTextInTurkish(
+    conditionText: any,
+    triggerTypeText: string | any[]
+  ) {
     let translatedText = conditionText
-        .replace(/&&/g, " ve ")
-        .replace(/\|\|/g, " veya ")
-        .replace(/_/g, "")
-        .replace(/\./g, " ")
-        .replace(/\(\(/g, "(")
-        .replace(/\)\)/g, ")");
+      .replace(/&&/g, " ve ")
+      .replace(/\|\|/g, " veya ")
+      .replace(/_/g, "")
+      .replace(/\./g, " ")
+      .replace(/\(\(/g, "(")
+      .replace(/\)\)/g, ")");
 
     translatedText = translatedText.replace(/includes/g, "içerir");
     translatedText = translatedText.replace(/lte/g, "büyük eşit");
@@ -326,7 +331,7 @@ export default function Workflow() {
     translatedText = translatedText.replace(/isNil/g, "boş değil");
 
     for (let i = 0; i < triggerTypeText.length; i++) {
-      const pattern = new RegExp(`VALUE\\[${i}\\]`, 'g');
+      const pattern = new RegExp(`VALUE\\[${i}\\]`, "g");
       translatedText = translatedText.replace(pattern, triggerTypeText[i]);
     }
 
@@ -334,14 +339,21 @@ export default function Workflow() {
   }
 
   function getTriggerTypeInTurkish(typeIndex: any) {
-    const triggerType = triggerTypeList.find(tt => tt.index === typeIndex);
+    const triggerType = triggerTypeList.find((tt) => tt.index === typeIndex);
     return triggerType ? triggerType.description : "";
   }
 
+  function getConditionTextInTurkishWithNames(
+    conditionText: any,
+    triggerTypeText: string | any[],
+    triggerType: string | number
+  ) {
+    let translatedText = getConditionTextInTurkish(
+      conditionText,
+      triggerTypeText
+    );
 
-  function getConditionTextInTurkishWithNames(conditionText: any, triggerTypeText: string | any[], triggerType: string | number) {
-    let translatedText = getConditionTextInTurkish(conditionText, triggerTypeText);
-
+    //@ts-ignore
     const relevantList = allLists[triggerType];
     if (!relevantList) return translatedText;
 
@@ -349,15 +361,21 @@ export default function Workflow() {
 
     let match;
     while ((match = regex.exec(translatedText)) !== null) {
-      if (match[1]) {  // Köşeli parantez varsa
-        const ids = match[2].split(',').map(Number);
+      if (match[1]) {
+        // Köşeli parantez varsa
+        const ids = match[2].split(",").map(Number);
         const names = findNamesByIds(ids, relevantList);
-        translatedText = translatedText.replace(match[1], `[${names.join(', ')}]`);
-      } else if (match[3]) {  // VALUE[x] varsa
+        translatedText = translatedText.replace(
+          match[1],
+          `[${names.join(", ")}]`
+        );
+      } else if (match[3]) {
+        // VALUE[x] varsa
         const index = Number(match[4]);
         const name = triggerTypeText[index];
         translatedText = translatedText.replace(match[3], name);
-      } else if (match[5]) {  // Düz sayı varsa
+      } else if (match[5]) {
+        // Düz sayı varsa
         const id = Number(match[5]);
         const name = findNamesByIds([id], relevantList);
         translatedText = translatedText.replace(id, name);
@@ -368,13 +386,16 @@ export default function Workflow() {
   }
 
   function findNamesByIds(ids: any[], list: any[]) {
-    return ids.map(id => {
-      const item = list.find(x => x.id === id);
+    return ids.map((id) => {
+      const item = list.find((x) => x.id === id);
       return item ? item.name : id;
     });
   }
 
-  function evalConditionForUI(condition: { triggerType: any; conditionText: any; }) {
+  function evalConditionForUI(condition: {
+    triggerType: any;
+    conditionText: any;
+  }) {
     let uiString = "";
 
     if (condition) {
@@ -382,16 +403,18 @@ export default function Workflow() {
 
       if (condition.triggerType) {
         for (const i in condition.triggerType) {
-          triggerTypeText.push(getTriggerTypeInTurkish(condition.triggerType[i]));
+          triggerTypeText.push(
+            getTriggerTypeInTurkish(condition.triggerType[i])
+          );
         }
         uiString += `${triggerTypeText.join(" ve ")}`;
       }
 
       if (condition.conditionText) {
         const conditionText = getConditionTextInTurkishWithNames(
-            condition.conditionText,
-            triggerTypeText,
-            condition.triggerType[0]
+          condition.conditionText,
+          triggerTypeText,
+          condition.triggerType[0]
         );
         uiString += " için koşul: " + conditionText;
       }
@@ -448,26 +471,25 @@ export default function Workflow() {
                       setSelectedStep(step);
                     }}
                   >
-                    <MaText className="ma-body-text-weight-bold"
-                    >Step [{step.startIndex}-{step.endIndex}]</MaText>
-
+                    <MaText className="ma-body-text-weight-bold">
+                      Step [{step.startIndex}-{step.endIndex}]
+                    </MaText>
 
                     {/*{getTriggers(step)}*/}
-                    <br/>
+                    <br />
                     <MaText>
                       {/*{step.condition*/}
                       {/*    ? evalConditionForUI(step.condition)*/}
                       {/*    : ""}*/}
                       {/*{getTriggers(step)}*/}
                     </MaText>
-                    <br/>
+                    <br />
                     <MaText>
                       {/*{step.condition*/}
                       {/*    ? evalConditionForUI(step.condition)*/}
                       {/*    : ""}*/}
                       {getTriggers(step)}
                     </MaText>
-
 
                     {/* {getCondition(step)} */}
                   </MaContainer>
@@ -489,96 +511,109 @@ export default function Workflow() {
                 </MaContainer>
 
                 {accordionStates[index]?.isOpen && (
-                  <MaContainer  fullWidth>
+                  <MaContainer fullWidth>
                     <MaAccordion
                       className="ma-size-margin-top-16"
                       isOpen={accordionStates[index]?.isOpen}
                     >
                       <MaContainer direction="column">
-                      {step.branches.map((branch, branchIndex) => (
-                        <MaContainer
-                          key={branchIndex}
-                          direction="column"
-                          horizontalGap={16}
-                          padding={16}
-                          fullWidth
-                          elevation="one"
-                          margin={8}
-                          borderRadius={6}
-
-                          // backgroundColor={{
-                          //   color: MasraffColorName.Ultraviolet,
-                          //   shadeName: MasraffColorShadeName.Lightest,
-                          // }}
-                        >
+                        {step.branches.map((branch, branchIndex) => (
                           <MaContainer
+                            key={branchIndex}
+                            direction="column"
+                            horizontalGap={16}
+                            padding={16}
+                            fullWidth
+                            elevation="one"
+                            margin={8}
+                            borderRadius={6}
+
+                            // backgroundColor={{
+                            //   color: MasraffColorName.Ultraviolet,
+                            //   shadeName: MasraffColorShadeName.Lightest,
+                            // }}
+                          >
+                            <MaContainer
                               fullWidth
                               verticalGap={16}
-                              onMaClick={() =>
-                                  toggleAccordion(index, true, branchIndex)
-                              }
-                          >
-                            <MaButton
-                              onMaClick={() => {
-                                changeStatus(true);
-                                setSelectedBranch(branch);
-                              }}
-                            >
-                              Branch {branchIndex}
-                            </MaButton>
-                            <MaButton
                               onMaClick={() =>
                                 toggleAccordion(index, true, branchIndex)
                               }
                             >
-                              <MaIcon
-                                color={MasraffColorType.Primary}
-                                iconName={
-                                  accordionStates[index]?.branches?.[
-                                    branchIndex
-                                  ]?.isOpen
-                                    ? MasraffIconNames.ChevronUp
-                                    : MasraffIconNames.ChevronBottom
-                                }
-                              />
-                            </MaButton>
-                          </MaContainer>
-                          {accordionStates[index]?.branches?.[branchIndex]
-                            ?.isOpen && (
-                            <MaContainer>
-                              <MaAccordion
-                                isOpen={
-                                  accordionStates[index]?.branches?.[
-                                    branchIndex
-                                  ]?.isOpen
+                              <MaButton
+                                onMaClick={() => {
+                                  changeStatus(true);
+                                  setSelectedBranch(branch);
+                                }}
+                              >
+                                Branch {branchIndex}
+                              </MaButton>
+                              <MaButton
+                                onMaClick={() =>
+                                  toggleAccordion(index, true, branchIndex)
                                 }
                               >
-                                <MaContainer  direction="column">
-                                  {/*{getTriggers(branch)}*/}
-                                  {/*<br/>*/}
-                                  <MaText className="ma-body-text-weight-bold">Kural</MaText>
-                                  {getTriggers(branch)}
-                                  {/*<br/>*/}
-                                  {/*{branch.condition*/}
-                                  {/*? evalConditionForUI(branch.condition)*/}
-                                  {/*: "-"}*/}
-                                  <br/>
-                                  <MaText className="ma-body-text-weight-bold">Onaycılar</MaText>
-
-                                  {branch.approvers ? branch.approvers.map((approver, approverIndex) => (
-                                      <MaContainer
-                                          key={approverIndex}
-                                          direction="column">
-                                        {`${approverIndex + 1}. ${users.find(x => x.id === approver.userId)?.name}`}
-                                      </MaContainer>
-                                      )
-                                  ) : "-"}
-                                </MaContainer>
-                              </MaAccordion>
+                                <MaIcon
+                                  color={MasraffColorType.Primary}
+                                  iconName={
+                                    accordionStates[index]?.branches?.[
+                                      branchIndex
+                                    ]?.isOpen
+                                      ? MasraffIconNames.ChevronUp
+                                      : MasraffIconNames.ChevronBottom
+                                  }
+                                />
+                              </MaButton>
                             </MaContainer>
-                          )}
-                        </MaContainer>
-                      ))}
+                            {accordionStates[index]?.branches?.[branchIndex]
+                              ?.isOpen && (
+                              <MaContainer>
+                                <MaAccordion
+                                  isOpen={
+                                    accordionStates[index]?.branches?.[
+                                      branchIndex
+                                    ]?.isOpen
+                                  }
+                                >
+                                  <MaContainer direction="column">
+                                    {/*{getTriggers(branch)}*/}
+                                    {/*<br/>*/}
+                                    <MaText className="ma-body-text-weight-bold">
+                                      Kural
+                                    </MaText>
+                                    {getTriggers(branch)}
+                                    {/*<br/>*/}
+                                    {/*{branch.condition*/}
+                                    {/*? evalConditionForUI(branch.condition)*/}
+                                    {/*: "-"}*/}
+                                    <br />
+                                    <MaText className="ma-body-text-weight-bold">
+                                      Onaycılar
+                                    </MaText>
+
+                                    {branch.approvers
+                                      ? branch.approvers.map(
+                                          (approver, approverIndex) => (
+                                            <MaContainer
+                                              key={approverIndex}
+                                              direction="column"
+                                            >
+                                              {`${approverIndex + 1}. ${
+                                                users.find(
+                                                  (x) =>
+                                                    x.id === approver.userId
+                                                )?.name
+                                              }`}
+                                            </MaContainer>
+                                          )
+                                        )
+                                      : "-"}
+                                  </MaContainer>
+                                </MaAccordion>
+                              </MaContainer>
+                            )}
+                          </MaContainer>
+                        ))}
                       </MaContainer>
                     </MaAccordion>
                   </MaContainer>
