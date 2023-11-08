@@ -47,6 +47,11 @@ const sections = [
     label: "labels.expensePolicy",
     href: "/expense-policy",
   },
+  {
+    iconName: MasraffIconNames.Branch,
+    label: "labels.workflow",
+    href: "/workflow",
+  },
 ];
 export function Sidebar() {
   const { t } = useTranslation();

@@ -7,7 +7,6 @@ import {
   DropdownSelection,
   GenericObject,
   OhpCodeData,
-  TripReport,
 } from "@/utils/types";
 import { getCustomReportForm } from "@/app/api/expenseCustomReport";
 import { getUserOhpCodeDataList } from "@/app/api/expense";

@@ -161,7 +161,8 @@
     "visaPassport": "Vize & Pasaport",
     "expensePolicy": "Gider Politikaları",
     "difference": "Fark",
-    "limit": "Limit"
+    "limit": "Limit",
+    "workflow": "Gelişmiş Onay Akışı"
   },
   "messages": { "hello": "Merhaba Dünya" },
   "validation": {

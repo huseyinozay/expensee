@@ -407,3 +407,32 @@ export interface CustomReportTableData {
   status: string;
   userEmail: string;
 }
+
+export interface WorkflowRuleSteps {
+  ruleSteps: WorkflowStep[];
+}
+
+export interface WorkflowStep {
+  startIndex: number;
+  endIndex: number;
+  branches: WorkflowBranch[];
+  condition: {
+    triggerType: number[];
+    conditionText: string;
+  };
+}
+
+export interface WorkflowApprover  {
+  index: number;
+  userId: number;
+};
+
+export interface WorkflowBranch {
+  index: number;
+  condition: {
+    triggerType: number[];
+    conditionText: string;
+  };
+  expenseCondition?: {};
+  approvers: WorkflowApprover[];
+}

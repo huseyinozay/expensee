@@ -5,6 +5,8 @@ import {
   ExpenseReport,
   GenericObject,
   TripReport,
+  WorkflowBranch,
+  WorkflowStep,
 } from "./types";
 
 const AUTH_PAGES = ["/login", "/register"];
@@ -526,6 +528,23 @@ const emptyTripReport: TripReport = {
   cityId: 0,
   isItAbroad: false,
 };
+
+
+
+export const emptyBranch: WorkflowBranch = {
+  index: 0,
+  condition: {
+    triggerType: [],
+    conditionText: ""
+  },
+  approvers: []
+};
+
+export const emptyStep : WorkflowStep = {
+  startIndex: 0,
+  endIndex: 0,
+  branches: [],
+}
 
 export const emptyCustomReportForm: CustomReportForm = {
   userBySubCompyList: [],

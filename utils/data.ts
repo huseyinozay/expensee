@@ -384,3 +384,310 @@ export const expensePolicyColumns: Array<Column> = [
     title: "labels.details",
   },
 ];
+
+
+export const workflowData: Array<any> = [
+  {
+    startIndex: 0,
+    endIndex: 1,
+    branches: [
+      {
+        index: 0,
+        condition: {
+          triggerType: [12],
+          conditionText: "_.includes([333,334,335,337,338,339,345],VALUE[0])",
+        },
+        approvers: [
+          {
+            Index: 0,
+            UserId: 37601,
+          },
+        ],
+      },
+      {
+        id: 1,
+        condition: {
+          triggerType: [12],
+          conditionText: "_.eq(341,VALUE[0])",
+        },
+        approvers: [
+          {
+            id: 0,
+            name: 8188,
+          },
+        ],
+      },
+      {
+        index: 2,
+        condition: {
+          triggerType: [12, 9],
+          conditionText: "_.eq(342,VALUE[0])",
+        },
+      },
+    ],
+  },
+  {
+    startIndex: 1,
+    endIndex: 2,
+    branches: [
+      {
+        index: 0,
+        condition: {
+          triggerType: [12],
+          conditionText: "_.includes([333],VALUE[0])",
+        },
+        approvers: [
+          {
+            I: 0,
+            name: 13465,
+          },
+        ],
+      },
+      {
+        index: 1,
+        condition: {
+          triggerType: [12, 5],
+          conditionText:
+            "_.includes([334], VALUE[0]) || (_.eq(342,VALUE[0]) && _.eq(1178,VALUE[1]))",
+        },
+        approvers: [
+          {
+            I: 0,
+            name: 7662,
+          },
+        ],
+      },
+      {
+        index: 2,
+        condition: {
+          triggerType: [12, 5],
+          conditionText:
+            "_.includes([335],VALUE[0]) || (_.eq(342,VALUE[0]) && _.eq(1182,VALUE[1]))",
+        },
+        approvers: [
+          {
+            I: 0,
+            name: 8310,
+          },
+        ],
+      },
+      {
+        index: 3,
+        condition: {
+          triggerType: [12, 5],
+          conditionText:
+            "_.includes([337],VALUE[0]) || (_.eq(342,VALUE[0]) && _.eq(1686,VALUE[1]))",
+        },
+        approvers: [
+          {
+            id: 0,
+            name: 8307,
+          },
+        ],
+      },
+      {
+        index: 4,
+        condition: {
+          triggerType: [12, 5],
+          conditionText:
+            "_.eq(338,VALUE[0]) || (_.eq(342,VALUE[0]) && _.eq(1183,VALUE[1]))",
+        },
+        approvers: [
+          {
+            id: 0,
+            name: 8309,
+          },
+        ],
+      },
+      {
+        index: 5,
+        condition: {
+          triggerType: [12],
+          conditionText: "_.includes([339,341],VALUE[0])",
+        },
+        approvers: [
+          {
+            id: 0,
+            name: 40775,
+          },
+        ],
+      },
+      {
+        index: 6,
+        condition: {
+          triggerType: [12],
+          conditionText: "_.includes([345],VALUE[0])",
+        },
+        approvers: [
+          {
+            id: 0,
+            name: 8312,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    startIndex: 2,
+    endIndex: 3,
+    branches: [
+      {
+        index: 0,
+        condition: {
+          triggerType: [12],
+          conditionText: "_.includes([333,334,335,337,338,339,341],VALUE[0])",
+        },
+        approvers: [
+          {
+            id: 0,
+            name: 8312,
+          },
+        ],
+      },
+      {
+        index: 1,
+        condition: {
+          triggerType: [12],
+          conditionText: "_.includes([345], VALUE[0])",
+        },
+      },
+    ],
+  },
+  {
+    startIndex: 3,
+    endIndex: 4,
+    condition: {
+      triggerType: [12, 13],
+      conditionText: "_.includes([342],VALUE[0])",
+    },
+    branches: [
+      {
+        index: 0,
+        condition: {
+          triggerType: [12],
+          conditionText: "_.includes([342],VALUE[0])",
+        },
+        approvers: [
+          {
+            index: 0,
+            name: 8312,
+          },
+        ],
+      },
+    ],
+  },
+];
+
+export const conditionNameList: Array<any> = [
+  {
+    name: 'eq',
+    description: 'Eşit',
+  },
+  {
+    name: 'lte',
+    description: 'Büyük Eşit',
+  },
+  {
+    name: 'includes',
+    description: 'İçerir',
+  },
+];
+
+export const triggerTypeList: Array<any> = [
+  {
+    index: 1,
+    description: 'Kullanıcı',
+  },
+  {
+    index: 2,
+    description: 'Departman',
+  },
+  {
+    index: 3,
+    description: 'Ünvan',
+  },
+  {
+    index: 4,
+    description: 'Tag',
+  },
+  {
+    index: 5,
+    description: 'Organizasyon',
+  },
+  {
+    index: 6,
+    description: 'Hepsi',
+  },
+  {
+    index: 7,
+    description: 'Kategori',
+  },
+  {
+    index: 8,
+    description: 'Toplam Tutar',
+  },
+  {
+    index: 9,
+    description: 'Linear',
+  },
+  {
+    index: 10,
+    description: 'Ek Alan',
+  },
+  {
+    index: 11,
+    description: 'Masraf',
+  },
+  {
+    index: 12,
+    description: 'Kullanıcı Grubu',
+  },
+  {
+    index: 13,
+    description: 'Son Onaycı',
+  },
+  {
+    index: 14,
+    description: 'Rapor Türü',
+  },
+  {
+    index: 15,
+    description: 'Kullanıcı Grubu',
+  },
+  {
+    index: 16,
+    description: 'Seviye sistemi',
+  },
+  {
+    index: 17,
+    description: 'Kullanıcı Seviyesi',
+  },
+  {
+    index: 18,
+    description: 'Masraf Merkezi Amiri',
+  },
+  {
+    index: 19,
+    description: 'İlk Yönetici',
+  },
+  {
+    index: 20,
+    description: 'Belirli bir Seviye',
+  },
+  {
+    index: 21,
+    description: 'Kullanıcı Seviye Değeri',
+  },
+  {
+    index: 22,
+    description: 'Seyahat Onay Akışı',
+  },
+  {
+    index: 23,
+    description: 'Seyahat Yurtdışı Kontrolü',
+  },
+  {
+    index: 24,
+    description: 'Etiketler ve Departmanlar ile Özelleşmiş Kural',
+  }
+];

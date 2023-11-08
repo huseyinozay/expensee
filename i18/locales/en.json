@@ -130,7 +130,8 @@
     "visaPassport": "Visa & Passport",
     "expensePolicy": "Expense Policy",
     "difference": "Difference",
-    "limit": "Limit"
+    "limit": "Limit",
+    "workflow": "Complex Workflow"
   },
   "messages": { "hello": "Hello World" },
   "validation": {
