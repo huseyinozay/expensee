@@ -6,7 +6,7 @@ import Hydrate from "@/utils/hydrate.client";
 
 export default async function Hydation() {
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(["workflowData"], getWorkflowData);
+  await queryClient.prefetchQuery(["workflowData"], () => getWorkflowData(""));
   const dehydratedState = dehydrate(queryClient);
 
   return (
